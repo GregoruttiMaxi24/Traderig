@@ -1,0 +1,228 @@
+/* ==========================================================================
+   TRADERIG - estilos propios sobre Bootstrap 5.3 (modo oscuro).
+   Fuente de verdad: presentación de identidad visual del grupo.
+   Colores y tipografías salen de las variables de abajo.
+   ========================================================================== */
+
+:root {
+    /* Paleta oficial */
+    --tr-cyan: #96fff3;
+    --tr-teal: #73beb6;
+    --tr-violet: #9640e7;
+    --tr-navy: #0e2a47;
+
+    /* Índigo del logotipo y derivados para fondos */
+    --tr-indigo: #201853;
+    --tr-bg: #171240;
+    --tr-surface: rgba(255, 255, 255, 0.06);
+    --tr-surface-border: rgba(255, 255, 255, 0.12);
+
+    --tr-text: #ebe9f8;
+    --tr-text-muted: #b9b4dc;
+
+    --tr-font-heading: "Roboto", system-ui, sans-serif;
+    --tr-font-body: "Open Sans", system-ui, sans-serif;
+    --tr-font-mono: "Roboto Mono", ui-monospace, monospace;
+}
+
+[data-bs-theme="dark"] {
+    --bs-body-font-family: var(--tr-font-body);
+    --bs-body-bg: var(--tr-bg);
+    --bs-body-color: var(--tr-text);
+    --bs-secondary-color: var(--tr-text-muted);
+    --bs-border-color: var(--tr-surface-border);
+    --bs-primary: var(--tr-violet);
+    --bs-primary-rgb: 150, 64, 231;
+    --bs-link-color: var(--tr-cyan);
+    --bs-link-color-rgb: 150, 255, 243;
+    --bs-link-hover-color: #ffffff;
+    --bs-link-hover-color-rgb: 255, 255, 255;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--tr-font-heading);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+:focus-visible {
+    outline: 3px solid var(--tr-cyan);
+    outline-offset: 2px;
+}
+
+/* Datos técnicos: precios, usuarios, specs (Roboto Mono, como en la guía de marca) */
+.tr-meta {
+    font-family: var(--tr-font-mono);
+    font-size: 0.9rem;
+}
+
+.tr-price {
+    font-family: var(--tr-font-mono);
+    font-weight: 500;
+    color: var(--tr-cyan);
+}
+
+/* Botones */
+.btn {
+    border-radius: 0.75rem;
+    font-weight: 600;
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--tr-violet);
+    --bs-btn-border-color: var(--tr-violet);
+    --bs-btn-color: #fff;
+    --bs-btn-hover-bg: #7f2fd0;
+    --bs-btn-hover-border-color: #7f2fd0;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-bg: #6d27b5;
+    --bs-btn-active-border-color: #6d27b5;
+    --bs-btn-active-color: #fff;
+}
+
+.btn-accent {
+    --bs-btn-bg: var(--tr-cyan);
+    --bs-btn-border-color: var(--tr-cyan);
+    --bs-btn-color: var(--tr-navy);
+    --bs-btn-hover-bg: var(--tr-teal);
+    --bs-btn-hover-border-color: var(--tr-teal);
+    --bs-btn-hover-color: var(--tr-navy);
+    --bs-btn-active-bg: var(--tr-teal);
+    --bs-btn-active-border-color: var(--tr-teal);
+    --bs-btn-active-color: var(--tr-navy);
+}
+
+/* Paneles, formularios (para las próximas fases) */
+.card {
+    --bs-card-bg: var(--tr-surface);
+    --bs-card-border-color: var(--tr-surface-border);
+    --bs-card-border-radius: 1rem;
+    --bs-card-inner-border-radius: calc(1rem - 1px);
+}
+
+.form-control,
+.form-select {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+    border-radius: 0.75rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: rgba(255, 255, 255, 0.09);
+    border-color: var(--tr-cyan);
+    box-shadow: 0 0 0 0.2rem rgba(150, 255, 243, 0.2);
+}
+
+/* Barra de navegación y pie */
+.tr-navbar {
+    background-color: var(--tr-indigo);
+    border-bottom: 1px solid rgba(115, 190, 182, 0.25);
+}
+
+.tr-navbar .nav-link.active {
+    color: var(--tr-cyan);
+}
+
+.tr-footer {
+    background-color: var(--tr-indigo);
+    border-top: 1px solid rgba(115, 190, 182, 0.25);
+    color: var(--tr-text-muted);
+    font-size: 0.95rem;
+}
+
+/* Portada */
+.tr-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 0 4.5rem;
+    background: linear-gradient(100deg, var(--tr-indigo) 0%, var(--tr-indigo) 45%, #4a2587 75%, var(--tr-violet) 100%);
+}
+
+.tr-hero .lead {
+    color: var(--tr-text);
+    max-width: 36rem;
+}
+
+.tr-hero-logo {
+    width: min(100%, 22rem);
+    height: auto;
+}
+
+/* Trazos de circuito de la marca, solo en pantallas anchas */
+@media (min-width: 992px) {
+    .tr-hero::before,
+    .tr-hero::after {
+        content: "";
+        position: absolute;
+        width: 150px;
+        height: 225px;
+        background: url("../img/circuit.svg") no-repeat center / contain;
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    .tr-hero::before {
+        top: 0;
+        left: 1.5rem;
+    }
+
+    .tr-hero::after {
+        right: 1.5rem;
+        bottom: 0;
+        transform: rotate(180deg);
+    }
+}
+
+/* Elemento gráfico de la marca: anillo + barra */
+.tr-node {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.tr-node i {
+    flex: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    box-sizing: border-box;
+    border: 0.45rem solid var(--tr-teal);
+    border-radius: 50%;
+}
+
+.tr-node b {
+    flex: 1;
+    height: 0.6rem;
+    margin-left: -1px;
+    background: var(--tr-teal);
+    border-radius: 0 999px 999px 0;
+}
+
+.tr-mode p {
+    color: var(--tr-text-muted);
+}
+
+/* Categorías */
+.tr-tile {
+    display: block;
+    padding: 1rem 1.1rem;
+    background: var(--tr-surface);
+    border: 1px solid var(--tr-surface-border);
+    border-radius: 1rem;
+    color: var(--tr-text);
+    font-family: var(--tr-font-heading);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+a.tr-tile:hover {
+    border-color: var(--tr-teal);
+    background: rgba(115, 190, 182, 0.12);
+    color: #fff;
+}
+
+@media (max-width: 575.98px) {
+    .tr-hero {
+        padding: 2.5rem 0 3rem;
+    }
+}

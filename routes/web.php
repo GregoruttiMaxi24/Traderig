@@ -3,17 +3,22 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserIsAdmin;
-use App\Models\Category;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('home', [
-        'categories' => Category::orderBy('name')->get(),
-    ]);
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Detalle de publicación y página pública del vendedor.
+// whereNumber evita choques con rutas como /publicaciones/crear (Fase 4).
+Route::get('/publicaciones/{listing}', [ListingController::class, 'show'])
+    ->whereNumber('listing')->name('listings.show');
+Route::get('/vendedores/{user}', [UserProfileController::class, 'show'])
+    ->whereNumber('user')->name('users.show');
 
 // Solo para visitantes (si ya ingresaste, te lleva al inicio)
 Route::middleware('guest')->group(function () {

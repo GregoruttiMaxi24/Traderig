@@ -1,8 +1,8 @@
-<nav class="navbar navbar-expand-md tr-navbar" data-bs-theme="dark">
+<nav class="navbar navbar-expand-lg tr-navbar" data-bs-theme="dark">
     <div class="container">
-        {{-- Sobre fondo oscuro el manual de marca pide la versión monocromática del logo --}}
-        <a class="navbar-brand py-0" href="{{ route('home') }}">
-            <img src="{{ asset('img/logo-icon-light.png') }}" alt="TRADERIG" height="38">
+        {{-- Isologotipo vertical monocromático: el que el manual de marca indica sobre fondo oscuro --}}
+        <a class="navbar-brand" href="{{ route('home') }}">
+            <img src="{{ asset('img/logo-full-light.png') }}" alt="TRADERIG" height="52">
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
@@ -11,44 +11,57 @@
         </button>
 
         <div class="collapse navbar-collapse" id="mainNav">
-            <ul class="navbar-nav me-auto">
+            <ul class="navbar-nav mx-lg-auto gap-lg-3">
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Inicio</a>
                 </li>
-                {{-- Los enlaces aparecen solos cuando se creen las rutas en las próximas fases --}}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('home') }}#categorias">Categorías</a>
+                </li>
+                {{-- Estos enlaces aparecen solos cuando se creen las rutas en las próximas fases --}}
                 @if (Route::has('listings.index'))
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('listings.*') ? 'active' : '' }}" href="{{ route('listings.index') }}">Catálogo</a>
+                        <a class="nav-link {{ request()->routeIs('listings.index') ? 'active' : '' }}" href="{{ route('listings.index') }}">Catálogo</a>
                     </li>
+                @endif
+                @if (Route::has('auctions.index'))
+                    <li class="nav-item"><a class="nav-link" href="{{ route('auctions.index') }}">Subastas</a></li>
                 @endif
                 @auth
                     @if (Route::has('dashboard'))
                         <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Mi panel</a></li>
                     @endif
-                    @if (auth()->user()->isAdmin() && Route::has('admin.index'))
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}" href="{{ route('admin.index') }}">Administración</a>
-                        </li>
-                    @endif
                 @endauth
             </ul>
 
-            <ul class="navbar-nav align-items-md-center gap-md-2">
+            <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
                 @auth
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}" href="{{ route('profile.edit') }}">{{ auth()->user()->name }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-light btn-sm">Cerrar sesión</button>
-                        </form>
-                    </li>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-tr dropdown-toggle d-flex align-items-center gap-2" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <x-avatar :user="auth()->user()" size="sm" />
+                            <span>{{ auth()->user()->name }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Mi perfil</a></li>
+                            <li><a class="dropdown-item" href="{{ route('users.show', auth()->user()) }}">Mi página pública</a></li>
+                            @if (auth()->user()->isAdmin())
+                                <li><a class="dropdown-item" href="{{ route('admin.index') }}">Administración</a></li>
+                            @endif
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">Cerrar sesión</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 @else
-                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('login') ? 'active' : '' }}" href="{{ route('login') }}">Ingresar</a></li>
-                    <li class="nav-item"><a class="btn btn-primary btn-sm" href="{{ route('register') }}">Crear cuenta</a></li>
+                    <a class="nav-link px-2" href="{{ route('login') }}">Ingresar</a>
+                    <a class="btn btn-primary" href="{{ route('register') }}">Crear cuenta</a>
                 @endauth
-            </ul>
+            </div>
         </div>
     </div>
 </nav>

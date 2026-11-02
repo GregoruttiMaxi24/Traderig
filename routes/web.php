@@ -10,6 +10,7 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BidController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -36,6 +37,11 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+
+    //-- pujas en subastas ---
+        Route::post('/subastas/{auction}/pujas', [BidController::class, 'store'])
+        ->whereNumber('auction')->name('auctions.bids.store');  
 
     // Solo administradores
     Route::middleware(EnsureUserIsAdmin::class)->prefix('admin')->group(function () {

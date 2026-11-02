@@ -1,23 +1,21 @@
-/* ==========================================================================
-   TRADERIG - estilos propios sobre Bootstrap 5.3 (modo oscuro).
-   Identidad: presentación de marca del grupo. Componentes: paneles de vidrio,
-   botones tipo pastilla y tarjetas redondeadas (estilo de los mockups).
-   Colores y tipografías salen de las variables de abajo.
-   ========================================================================== */
-
 :root {
-    /* Paleta oficial */
-    --tr-cyan: #96fff3;
-    --tr-teal: #73beb6;
-    --tr-violet: #9640e7;
-    --tr-navy: #0e2a47;
+    /* ---- Paleta TRADERIG ---- */
+    --tr-cyan: #96fff3;         /* Blanco */
+    --tr-teal: #73beb6;         /* Menta */
+    --tr-violet: #9640e7;       /* Violeta */
+    --tr-navy: #0e2a47;         /* Azul oscuro */
 
-    /* Índigo del logotipo y derivados */
+    /* ---- Tipografía ---- */
+    --tr-font-heading: "Roboto", system-ui, sans-serif;         /* Roboto: títulos */
+    --tr-font-mono: "Roboto Mono", ui-monospace, monospace;     /* Roboto Mono: usuarios */
+    --tr-font-body: "Open Sans", system-ui, sans-serif;         /* Open Sans: texto */
+
+    /* ---- Derivados de la paleta (fondos, vidrio y texto) ---- */
     --tr-indigo: #201853;
     --tr-bg: #171240;
-    --tr-bg-deep: #0d0828;
+    --tr-bg-deep: #09061d;
     --tr-violet-soft: #b57bff;
-    --tr-grad: linear-gradient(135deg, #5b2bd9, #9640e7);
+    --tr-grad: linear-gradient(135deg, #5b2bd9, var(--tr-violet));
 
     --tr-glass: linear-gradient(160deg, rgba(150, 64, 231, 0.30) 0%, rgba(255, 255, 255, 0.07) 100%);
     --tr-glass-border: rgba(255, 255, 255, 0.16);
@@ -25,12 +23,9 @@
 
     --tr-text: #ebe9f8;
     --tr-text-muted: #b9b4dc;
-
-    --tr-font-heading: "Roboto", system-ui, sans-serif;
-    --tr-font-body: "Open Sans", system-ui, sans-serif;
-    --tr-font-mono: "Roboto Mono", ui-monospace, monospace;
 }
 
+/* Variables de Bootstrap ajustadas a la marca */
 [data-bs-theme="dark"] {
     --bs-body-font-family: var(--tr-font-body);
     --bs-body-bg: var(--tr-bg-deep);
@@ -45,12 +40,12 @@
     --bs-link-hover-color-rgb: 255, 255, 255;
 }
 
+
+/* --------------------------------- BASE --------------- */
+
 body {
-    background-color: var(--tr-bg-deep);
-    background-image:
-        radial-gradient(60rem 28rem at 12% -4%, rgba(150, 64, 231, 0.40), transparent 62%),
-        radial-gradient(50rem 30rem at 100% 28%, rgba(74, 37, 135, 0.55), transparent 62%),
-        linear-gradient(180deg, var(--tr-bg-deep) 0%, var(--tr-bg) 45%, #1a1047 100%);
+ background: #020024;
+background: linear-gradient(330deg, rgba(2, 0, 36, 1) 0%, rgba(2, 0, 36, 1) 58%, rgba(25, 1, 94, 1) 87%, rgba(36, 1, 122, 1) 97%);
     background-repeat: no-repeat;
 }
 
@@ -65,8 +60,12 @@ h1, h2, h3, h4, h5, h6 {
     outline-offset: 2px;
 }
 
-/* Títulos con degradé */
-.tr-title {
+
+/* -------------- TEXTO Y DATOS --------------------*/
+
+/* Títulos con degradado */
+.tr-title,
+.tr-section__title {
     background: linear-gradient(90deg, #f0e6ff, var(--tr-violet-soft));
     -webkit-background-clip: text;
     background-clip: text;
@@ -81,7 +80,7 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 0.5rem;
 }
 
-/* Datos técnicos (Roboto Mono, como en la guía de marca) */
+/* Datos técnicos */
 .tr-meta {
     font-family: var(--tr-font-mono);
     font-size: 0.85rem;
@@ -105,7 +104,9 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0.6;
 }
 
-/* Botones tipo pastilla */
+
+/* ------- 4. BOTONES (tipo pastilla) --------- */
+
 .btn {
     border-radius: 999px;
     font-weight: 600;
@@ -161,6 +162,9 @@ h1, h2, h3, h4, h5, h6 {
     --bs-btn-active-color: var(--tr-navy);
 }
 
+
+/* ----- 5. LOS PANELES, Formularios y componentes de BOOTSTRAP ---- */
+
 /* Paneles de vidrio */
 .tr-card,
 .card {
@@ -211,7 +215,9 @@ h1, h2, h3, h4, h5, h6 {
     --bs-pagination-focus-bg: rgba(150, 64, 231, 0.25);
 }
 
-/* Barra de navegación */
+
+/*  ------------ Navbar ------------ */
+
 .tr-navbar {
     padding-block: 0.6rem;
 }
@@ -226,17 +232,29 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--tr-cyan);
 }
 
-@media (max-width: 991.98px) {
+/* Celular y tablet: el menú desplegado se ve como un panel */
+.tr-navbar .navbar-collapse {
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background: rgba(32, 24, 83, 0.95);
+    border: 1px solid var(--tr-glass-border);
+    border-radius: 1.25rem;
+}
+
+/* Escritorio: el menú va en línea, sin panel */
+@media (min-width: 992px) {
     .tr-navbar .navbar-collapse {
-        margin-top: 0.75rem;
-        padding: 1rem;
-        background: rgba(32, 24, 83, 0.95);
-        border: 1px solid var(--tr-glass-border);
-        border-radius: 1.25rem;
+        margin-top: 0;
+        padding: 0;
+        background: none;
+        border: 0;
+        border-radius: 0;
     }
 }
 
-/* Avatares con la inicial */
+
+/* ----------- AVATARES (c/ la inicial) -------------- */
+
 .tr-avatar {
     --s: 3rem;
     display: inline-grid;
@@ -258,11 +276,13 @@ h1, h2, h3, h4, h5, h6 {
 .tr-avatar--c1 { background: linear-gradient(135deg, #3f8f86, var(--tr-teal)); color: var(--tr-navy); }
 .tr-avatar--c2 { background: linear-gradient(135deg, var(--tr-teal), var(--tr-cyan)); color: var(--tr-navy); }
 
-/* Portada */
+
+/* -------------- 8. PORTADA --------------------------- */
+
 .tr-hero {
     position: relative;
     overflow: hidden;
-    padding: 4rem 0 4.5rem;
+    padding: 2.5rem 0 3rem;
 }
 
 .tr-hero .lead {
@@ -296,6 +316,13 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--tr-cyan);
 }
 
+@media (min-width: 576px) {
+    .tr-hero {
+        padding: 4rem 0 4.5rem;
+    }
+}
+
+/* Circuitos decorativos en las esquinas - (Elemento visuales) */
 @media (min-width: 992px) {
     .tr-hero::before,
     .tr-hero::after {
@@ -312,7 +339,9 @@ h1, h2, h3, h4, h5, h6 {
     .tr-hero::after { right: 1.5rem; bottom: 0; transform: rotate(180deg); }
 }
 
-/* Encabezados de sección */
+
+/* ------ 9. ENCABEZADOS DE SECCIÓN ------------------------- */
+
 .tr-section {
     display: flex;
     align-items: center;
@@ -321,17 +350,13 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1.5rem;
 }
 
+/* El degradé del título viene de la sección 3 */
 .tr-section__title {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     margin: 0;
     font-size: clamp(1.5rem, 3vw, 2.1rem);
-    font-weight: 800;
-    background: linear-gradient(90deg, #f0e6ff, var(--tr-violet-soft));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
 }
 
 .tr-section__title::before {
@@ -352,7 +377,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .tr-section__link:hover { color: var(--tr-cyan); }
 
-/* Tarjeta de publicación */
+
+/* ---- 10. tarjeta de la PUBLICACIÓN  --------------------------- */
+
 .tr-listing {
     display: block;
     padding: 0.6rem;
@@ -367,6 +394,7 @@ h1, h2, h3, h4, h5, h6 {
     color: inherit;
 }
 
+/* Imagen cuadrada (la comparten la tarjeta y el detalle) */
 .tr-listing__media,
 .tr-detail-media {
     position: relative;
@@ -384,6 +412,7 @@ h1, h2, h3, h4, h5, h6 {
     object-fit: cover;
 }
 
+/* Imagen de reemplazo cuando no hay foto */
 .tr-ph {
     display: grid;
     place-items: center;
@@ -436,7 +465,9 @@ h1, h2, h3, h4, h5, h6 {
     margin-top: 0.8rem;
 }
 
-/* Detalle de publicación */
+
+/* ------ Detalle De la Publicación ---------------------------  */
+
 .tr-detail-media {
     padding: 0.5rem;
     border: 1px solid var(--tr-glass-border);
@@ -470,7 +501,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .tr-specs {
     display: grid;
-    grid-template-columns: 8rem 1fr;
+    grid-template-columns: 6.5rem 1fr;
     gap: 0.6rem 1rem;
     margin: 0;
     font-size: 0.95rem;
@@ -478,6 +509,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .tr-specs dt { font-weight: 400; color: var(--tr-text-muted); }
 .tr-specs dd { margin: 0; }
+
+@media (min-width: 576px) {
+    .tr-specs { grid-template-columns: 8rem 1fr; }
+}
 
 .tr-activity {
     display: flex;
@@ -487,15 +522,59 @@ h1, h2, h3, h4, h5, h6 {
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Perfil público */
+/* -------------------- Caja de puja --------------------------- */
+.tr-bid-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--tr-glass-border);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+}
+
+.tr-bid-title {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 0.6rem;
+    font-family: var(--tr-font-heading);
+    font-weight: 700;
+    color: var(--tr-violet-soft);
+}
+
+.tr-bid-box .input-group-text {
+    background-color: rgba(150, 64, 231, 0.25);
+    border-color: rgba(255, 255, 255, 0.2);
+    border-top-left-radius: 0.9rem;
+    border-bottom-left-radius: 0.9rem;
+    color: var(--tr-cyan);
+    font-family: var(--tr-font-mono);
+}
+
+.tr-bid-box .form-control {
+    color: var(--tr-cyan);
+    font-family: var(--tr-font-mono);
+    font-weight: 500;
+}
+
+.tr-bid-hint {
+    margin: 0.6rem 0 1rem;
+    font-size: 0.85rem;
+    color: var(--tr-text-muted);
+}
+
+
+/* -------------- 12. PERFIL PÚBLICO  --------------------------- */
+
 .tr-cover {
-    height: 14rem;
+    height: 9rem;
     border-radius: 1.75rem;
     border: 1px solid var(--tr-glass-border);
     background:
         url("../img/circuit.svg") no-repeat left 1rem top 0 / 9rem,
         url("../img/circuit.svg") no-repeat right 1rem top 0 / 9rem,
         linear-gradient(110deg, var(--tr-indigo), #4a2587 60%, var(--tr-violet));
+}
+
+@media (min-width: 576px) {
+    .tr-cover { height: 14rem; }
 }
 
 .tr-profile-head {
@@ -544,7 +623,9 @@ h1, h2, h3, h4, h5, h6 {
     border-color: transparent;
 }
 
-/* Categorías en ranking */
+
+/* 13. --- LISTAS: categorías en ranking y panel de vendedores ---------------------------  */
+
 .tr-rank {
     display: flex;
     align-items: center;
@@ -571,7 +652,6 @@ a.tr-rank:hover {
 
 .tr-rank__name { flex: 1; font-weight: 600; }
 
-/* Panel de lista (vendedores) */
 .tr-panel {
     padding: 1.25rem;
     background: rgba(8, 5, 28, 0.7);
@@ -599,7 +679,9 @@ a.tr-rank:hover {
 
 .tr-panel__row:hover { background: rgba(150, 64, 231, 0.18); color: #fff; }
 
-/* Elemento gráfico de la marca: anillo + barra */
+
+/* 14. --  ELEMENTO GRÁFICO DE LA MARCA (anillo + barra) ---------------------------  */
+
 .tr-node {
     display: flex;
     align-items: center;
@@ -625,7 +707,9 @@ a.tr-rank:hover {
 
 .tr-mode p { color: var(--tr-text-muted); }
 
-/* Pie */
+
+/*  ---- 15. footer --------------------------- */
+
 .tr-footer {
     margin-top: 5rem;
     padding: 3rem 0 2rem;
@@ -640,11 +724,8 @@ a.tr-rank:hover {
 .tr-links a { color: var(--tr-text-muted); text-decoration: none; }
 .tr-links a:hover { color: var(--tr-cyan); }
 
-@media (max-width: 575.98px) {
-    .tr-hero { padding: 2.5rem 0 3rem; }
-    .tr-cover { height: 9rem; }
-    .tr-specs { grid-template-columns: 6.5rem 1fr; }
-}
+
+/* --- --- 16. ACCESIBILIDAD -------- */
 
 @media (prefers-reduced-motion: reduce) {
     .tr-listing { transition: none; }

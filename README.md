@@ -11,14 +11,14 @@ Tesis de la carrera de Diseño y Desarrollo Web.
 - Laravel (PHP 8.3 o superior) con vistas Blade
 - MariaDB
 - Bootstrap 5 (por CDN) y CSS propio en `public/css/traderig.css`
+- Vue 3 con Vite para las partes interactivas (por ejemplo, el panel de la subasta)
 - JavaScript propio en `public/js/traderig.js`
-
-No hace falta Node.js ni compilar nada: Bootstrap se carga por CDN.
 
 ## Requisitos
 
 - PHP 8.3 o superior
 - Composer
+- Node.js LTS (20.19 o superior) y npm
 - MariaDB (por ejemplo desde Laragon) y un cliente como HeidiSQL
 
 ## Instalación
@@ -32,10 +32,11 @@ No hace falta Node.js ni compilar nada: Bootstrap se carga por CDN.
 
 2. Crear en MariaDB una base de datos vacía llamada `traderig`.
 
-3. Instalar las dependencias:
+3. Instalar las dependencias de PHP y de JavaScript:
 
    ```bash
    composer install
+   npm install
    ```
 
 4. Copiar `.env.example` a `.env`:
@@ -44,7 +45,8 @@ No hace falta Node.js ni compilar nada: Bootstrap se carga por CDN.
    copy .env.example .env
    ```
 
-   Abrir `.env` y completar `DB_USERNAME` y `DB_PASSWORD` con los datos de la MariaDB local.
+   Abrir `.env` y completar `DB_USERNAME` y `DB_PASSWORD` con los datos de la MariaDB local
+   (y `DB_PORT` si tu MariaDB no usa el 3306).
    `APP_NAME`, `APP_LOCALE` y `DB_DATABASE` ya vienen configurados.
 
 5. Generar la clave de la aplicación, crear las tablas y cargar los datos de prueba:
@@ -53,10 +55,22 @@ No hace falta Node.js ni compilar nada: Bootstrap se carga por CDN.
    php artisan key:generate
    php artisan migrate --seed
    php artisan storage:link
+   ```
+
+6. Levantar el proyecto con **dos terminales abiertas a la vez**:
+
+   ```bash
    php artisan serve
    ```
 
-6. Abrir http://127.0.0.1:8000
+   ```bash
+   npm run dev
+   ```
+
+   La primera sirve el sitio y la segunda compila el JavaScript (Vite). Si solo querés
+   probar el sitio sin modificar JavaScript, alcanza con correr una vez `npm run build`.
+
+7. Abrir http://127.0.0.1:8000
 
 ## Usuarios de prueba
 

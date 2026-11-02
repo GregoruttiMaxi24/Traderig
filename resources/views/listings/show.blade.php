@@ -24,8 +24,8 @@
 
             {{-- Panel de información --}}
             <div class="col-lg-5">
-                <div class="card">
-                    <div class="card-body p-4 p-xl-5">
+                <div class="card px-3 py-4">
+                    <div class="card-body p-4">
                         <h1 class="tr-title h2 mb-1">{{ $listing->title }}</h1>
                         <p class="mb-3">
                             <a href="{{ route('users.show', $listing->user) }}">{{ $listing->user->name }}</a>
@@ -33,7 +33,7 @@
                         </p>
 
                         <div class="tr-badges tr-badges--inline mb-3">
-                            @if ($auction)<span class="tr-badge">Subasta</span>@endif
+                            @if ($auction)<span class="tr-badge mb-3">Subasta</span>@endif
                             @if ($listing->accepts_trade)<span class="tr-badge">Acepta intercambio</span>@endif
                             @if ($listing->status !== 'active')<span class="tr-badge">{{ \App\Models\Listing::STATUSES[$listing->status] ?? $listing->status }}</span>@endif
                         </div>
@@ -54,17 +54,30 @@
                         @endif
 
                         {{-- Acciones: se activan cuando existan las rutas de las Fases 5 y 6 --}}
-                        <div class="d-grid gap-2 my-4">
-                            @if ($auction && $auction->isOpen())
-                                @if (Route::has('auctions.bids.store'))
-                                    <form method="POST" action="{{ route('auctions.bids.store', $auction) }}">
-                                        @csrf
-                                        <button type="submit" class="btn btn-primary btn-lg w-100">Pujar</button>
-                                    </form>
+                       @if ($auction && $auction->isOpen())
+                            @php $minBid = $auction->minimumNextBid(); @endphp
+                            @auth
+                                @if (auth()->id() === $listing->user_id)
+                                    <p class="tr-meta text-body-secondary mb-0">Esta es tu subasta: no podés pujar en ella.</p>
                                 @else
-                                    <button type="button" class="btn btn-primary btn-lg" disabled>Pujar</button>
+                                    <form method="POST" action="{{ route('auctions.bids.store', $auction) }}" novalidate>
+                                        @csrf
+                                        <label for="amount" class="tr-bid-title">Hacé tu puja:</label>
+                                            <div class="input-group input-group-lg has-validation">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" name="amount" id="amount"
+                                                    class="form-control @error('amount') is-invalid @enderror"
+                                                    min="{{ $minBid }}" max="6000000" step="0.01" value="{{ old('amount', (float) $minBid) }}" required>
+                                                @error('amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                            <p class="tr-bid-hint">Puja mínima: <span class="tr-price">{{ \App\Support\Money::format($minBid) }}</span></p>
+                                            <button type="submit" class="btn btn-primary btn-lg w-100">Pujar</button>
+                                    </form>
                                 @endif
-                            @endif
+                            @else
+                                <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Ingresá para pujar</a>
+                            @endauth
+                        @endif
 
                             @if ($listing->accepts_trade)
                                 @if (Route::has('trade-offers.create'))
@@ -75,7 +88,7 @@
                             @endif
                         </div>
 
-                        <h2 class="tr-subtitle">Descripción</h2>
+                        <h2 class="tr-subtitle py-3">Descripción</h2>
                         <p class="mb-4">{{ $listing->description }}</p>
 
                         <ul class="nav tr-tabs mb-3" role="tablist">
@@ -96,7 +109,7 @@
                                     @if ($listing->city)<dt>Ubicación</dt><dd>{{ $listing->city }}</dd>@endif
                                     <dt>Tipo</dt><dd>{{ $listing->type_label }}</dd>
                                     <dt>Intercambio</dt><dd>{{ $listing->accepts_trade ? 'Acepta ofertas' : 'No acepta' }}</dd>
-                                    @if ($auction)<dt>Cierre</dt><dd class="tr-meta">{{ $auction->ends_at->format('d/m/Y H:i') }}</dd>@endif
+                                    @if ($auction)<dt>Cierra</dt><dd class="tr-meta">{{ $auction->ends_at->format('d/m/Y H:i') }}</dd>@endif
                                     <dt>Publicada</dt><dd class="tr-meta">{{ $listing->created_at->format('d/m/Y') }}</dd>
                                 </dl>
                             </div>
@@ -117,18 +130,19 @@
 
                         <hr class="tr-divider">
 
-                        <h2 class="tr-subtitle">Vendedor</h2>
+                        <h2 class="tr-subtitle my-3">Vendedor</h2>
                         <div class="d-flex align-items-center gap-3">
                             <x-avatar :user="$listing->user" size="lg" />
                             <div class="flex-grow-1">
                                 <div class="fw-semibold">{{ $listing->user->name }}</div>
                                 <div class="tr-meta text-body-secondary">{{ $sellerListingsCount }} {{ $sellerListingsCount === 1 ? 'publicación activa' : 'publicaciones activas' }}</div>
                             </div>
-                            <a href="{{ route('users.show', $listing->user) }}" class="btn btn-outline-tr">Ver perfil</a>
+                           
                         </div>
 
-                        <div class="mt-4">
-                            <button type="button" class="btn btn-outline-tr btn-sm" data-copy-link>Copiar enlace</button>
+                        <div class="d-flex align-items-center gap-3 mt-5">
+                            <button type="button" class="btn btn-outline-tr" data-copy-link>Copiar enlace</button>
+                            <a href="{{ route('users.show', $listing->user) }}" class="btn btn-outline-tr">Ver perfil</a>
                         </div>
                     </div>
                 </div>

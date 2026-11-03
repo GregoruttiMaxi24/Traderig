@@ -11,16 +11,19 @@ use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BidController;
+use App\Http\Controllers\AuctionController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Detalle de publicación y página pública del vendedor.
-// whereNumber evita choques con rutas como /publicaciones/crear (Fase 4).
 Route::get('/publicaciones/{listing}', [ListingController::class, 'show'])
     ->whereNumber('listing')->name('listings.show');
+Route::get('/subastas/{auction}/estado', [AuctionController::class, 'state'])
+    ->whereNumber('auction')->name('auctions.state');    
 Route::get('/vendedores/{user}', [UserProfileController::class, 'show'])
     ->whereNumber('user')->name('users.show');
 
+    
 // Solo para visitantes (si ya ingresaste, te lleva al inicio)
 Route::middleware('guest')->group(function () {
     Route::get('/registro', [RegisterController::class, 'show'])->name('register');

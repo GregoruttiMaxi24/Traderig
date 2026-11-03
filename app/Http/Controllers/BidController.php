@@ -18,19 +18,23 @@ class BidController extends Controller
      * Toda la validación de negocio se hace dentro de una transacción con la fila de la
      * subasta bloqueada (lockForUpdate): si dos personas pujan al mismo tiempo, la segunda
      * espera a que termine la primera y recién ahí valida contra el precio ya actualizado.
+     * Los montos son pesos enteros, así que se comparan directamente con los operadores comunes.
      */
     public function store(Request $request, Auction $auction): RedirectResponse
     {
         $data = $request->validate([
-            'amount' => ['required', 'decimal:0,2', 'gt:0', 'max:6000000'],
+            'amount' => ['required', 'integer', 'min:1', 'max:6000000'],
         ], [
             'amount.required' => 'Ingresá el monto de tu puja.',
-            'amount.decimal' => 'Ingresá un monto válido, por ejemplo: 1500 o 1500.50.',
-            'amount.gt' => 'El monto debe ser mayor a cero.',
+            'amount.integer' => 'Ingresá un monto en pesos enteros, sin centavos. Por ejemplo: 1500.',
+            'amount.min' => 'El monto debe ser mayor a cero.',
             'amount.max' => 'El monto es demasiado alto.',
         ]);
 
-        DB::transaction(function () use ($auction, $request, $data) {
+        // validate() devuelve el valor como texto; se lo pasa a número entero.
+        $amount = (int) $data['amount'];
+
+        DB::transaction(function () use ($auction, $request, $amount) {
             // Releemos la subasta bloqueándola: a partir de acá los datos son los definitivos.
             $locked = Auction::lockForUpdate()->findOrFail($auction->id);
             $locked->load('listing');
@@ -45,7 +49,7 @@ class BidController extends Controller
 
             $minimum = $locked->minimumNextBid();
 
-            if (bccomp($data['amount'], $minimum, 2) < 0) {
+            if ($amount < $minimum) {
                 throw ValidationException::withMessages([
                     'amount' => 'La puja mínima es '.Money::format($minimum).'.',
                 ]);
@@ -54,10 +58,10 @@ class BidController extends Controller
             Bid::create([
                 'auction_id' => $locked->id,
                 'user_id' => $request->user()->id,
-                'amount' => $data['amount'],
+                'amount' => $amount,
             ]);
 
-            $locked->update(['current_price' => $data['amount']]);
+            $locked->update(['current_price' => $amount]);
         });
 
         return redirect()->route('listings.show', $auction->listing_id)

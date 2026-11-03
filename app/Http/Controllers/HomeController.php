@@ -34,9 +34,9 @@ class HomeController extends Controller
             ->take(9)
             ->get();
 
-        $sellers = User::where('is_blocked', false)
+         $sellers = User::where('is_blocked', false)
+            ->whereHas('listings', fn ($q) => $q->active())
             ->withCount(['listings as active_count' => fn ($q) => $q->active()])
-            ->having('active_count', '>', 0)
             ->orderByDesc('active_count')
             ->take(5)
             ->get();

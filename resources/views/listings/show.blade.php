@@ -53,31 +53,32 @@
                             <p class="tr-price display-6 mb-0">{{ \App\Support\Money::format($listing->price) }}</p>
                         @endif
 
-                        {{-- Acciones: se activan cuando existan las rutas de las Fases 5 y 6 --}}
-                       @if ($auction && $auction->isOpen())
-                            @php $minBid = $auction->minimumNextBid(); @endphp
-                            @auth
-                                @if (auth()->id() === $listing->user_id)
-                                    <p class="tr-meta text-body-secondary mb-0">Esta es tu subasta: no podés pujar en ella.</p>
-                                @else
-                                    <form method="POST" action="{{ route('auctions.bids.store', $auction) }}" novalidate>
-                                        @csrf
-                                        <label for="amount" class="tr-bid-title">Hacé tu puja:</label>
+                        {{-- Acciones: puja (si la subasta está abierta) e intercambio --}}
+                        <div class="d-grid gap-2 my-4">
+                            @if ($auction && $auction->isOpen())
+                                @php $minBid = $auction->minimumNextBid(); @endphp
+                                @auth
+                                    @if (auth()->id() === $listing->user_id)
+                                        <p class="tr-meta text-body-secondary mb-0">Esta es tu subasta: no podés pujar en ella.</p>
+                                    @else
+                                        <form method="POST" action="{{ route('auctions.bids.store', $auction) }}" class="tr-bid-box" novalidate>
+                                            @csrf
+                                            <label for="amount" class="tr-bid-title">Hacé tu puja</label>
                                             <div class="input-group input-group-lg has-validation">
                                                 <span class="input-group-text">$</span>
                                                 <input type="number" name="amount" id="amount"
                                                     class="form-control @error('amount') is-invalid @enderror"
-                                                    min="{{ $minBid }}" max="6000000" step="0.01" value="{{ old('amount', (float) $minBid) }}" required>
+                                                    min="{{ $minBid }}" max="6000000" step="1" value="{{ old('amount', $minBid) }}" required>
                                                 @error('amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                             <p class="tr-bid-hint">Puja mínima: <span class="tr-price">{{ \App\Support\Money::format($minBid) }}</span></p>
                                             <button type="submit" class="btn btn-primary btn-lg w-100">Pujar</button>
-                                    </form>
-                                @endif
-                            @else
-                                <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Ingresá para pujar</a>
-                            @endauth
-                        @endif
+                                        </form>
+                                    @endif
+                                @else
+                                    <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Ingresá para pujar</a>
+                                @endauth
+                            @endif
 
                             @if ($listing->accepts_trade)
                                 @if (Route::has('trade-offers.create'))
@@ -137,7 +138,6 @@
                                 <div class="fw-semibold">{{ $listing->user->name }}</div>
                                 <div class="tr-meta text-body-secondary">{{ $sellerListingsCount }} {{ $sellerListingsCount === 1 ? 'publicación activa' : 'publicaciones activas' }}</div>
                             </div>
-                           
                         </div>
 
                         <div class="d-flex align-items-center gap-3 mt-5">

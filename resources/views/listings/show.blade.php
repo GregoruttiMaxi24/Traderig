@@ -6,7 +6,6 @@
     @php
         $auction = $listing->auction;
         $photo = $listing->photos->first();
-        $hasBids = $bids->isNotEmpty();
     @endphp
 
     <div class="container py-4">
@@ -38,48 +37,20 @@
                             @if ($listing->status !== 'active')<span class="tr-badge">{{ \App\Models\Listing::STATUSES[$listing->status] ?? $listing->status }}</span>@endif
                         </div>
 
-                        @if ($auction)
-                            <span class="tr-label">{{ $hasBids ? 'Puja actual' : 'Puja inicial' }}</span>
-                            <p class="tr-price display-6 mb-1">{{ \App\Support\Money::format($auction->current_price) }}</p>
-                            <p class="tr-meta mb-0">
-                                @if ($auction->isOpen())
-                                    Cierra en <span data-countdown="{{ $auction->ends_at->toIso8601String() }}">{{ $auction->ends_at->format('d/m H:i') }}</span>
-                                @else
-                                    Subasta cerrada
-                                @endif
-                            </p>
+                    @if ($auction)
+{{-- -----este es el panel de Vue: precio actual, cuenta regresiva y últimas pujas --}}
+                   <div id="auction-panel"
+                                 data-state-url="{{ route('auctions.state', $auction) }}"
+                                 data-bid-url="{{ route('auctions.bids.store', $auction) }}"
+                                 data-login-url="{{ route('login') }}"
+                                 data-seller-id="{{ $listing->user_id }}"></div>
                         @else
                             <span class="tr-label">Precio</span>
                             <p class="tr-price display-6 mb-0">{{ \App\Support\Money::format($listing->price) }}</p>
                         @endif
 
-                        {{-- Acciones: puja (si la subasta está abierta) e intercambio --}}
+                        {{-- Acciones: intercambio (la puja está dentro del panel Vue) --}}
                         <div class="d-grid gap-2 my-4">
-                            @if ($auction && $auction->isOpen())
-                                @php $minBid = $auction->minimumNextBid(); @endphp
-                                @auth
-                                    @if (auth()->id() === $listing->user_id)
-                                        <p class="tr-meta text-body-secondary mb-0">Esta es tu subasta: no podés pujar en ella.</p>
-                                    @else
-                                        <form method="POST" action="{{ route('auctions.bids.store', $auction) }}" class="tr-bid-box" novalidate>
-                                            @csrf
-                                            <label for="amount" class="tr-bid-title">Hacé tu puja</label>
-                                            <div class="input-group input-group-lg has-validation">
-                                                <span class="input-group-text">$</span>
-                                                <input type="number" name="amount" id="amount"
-                                                    class="form-control @error('amount') is-invalid @enderror"
-                                                    min="{{ $minBid }}" max="6000000" step="1" value="{{ old('amount', $minBid) }}" required>
-                                                @error('amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                            </div>
-                                            <p class="tr-bid-hint">Puja mínima: <span class="tr-price">{{ \App\Support\Money::format($minBid) }}</span></p>
-                                            <button type="submit" class="btn btn-primary btn-lg w-100">Pujar</button>
-                                        </form>
-                                    @endif
-                                @else
-                                    <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Ingresá para pujar</a>
-                                @endauth
-                            @endif
-
                             @if ($listing->accepts_trade)
                                 @if (Route::has('trade-offers.create'))
                                     <a href="{{ route('trade-offers.create', $listing) }}" class="btn btn-outline-tr btn-lg">Proponer intercambio</a>
@@ -92,40 +63,25 @@
                         <h2 class="tr-subtitle py-3">Descripción</h2>
                         <p class="mb-4">{{ $listing->description }}</p>
 
-                        <ul class="nav tr-tabs mb-3" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="tab-details" data-bs-toggle="tab" data-bs-target="#pane-details" type="button" role="tab" aria-controls="pane-details" aria-selected="true">Detalles</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="tab-activity" data-bs-toggle="tab" data-bs-target="#pane-activity" type="button" role="tab" aria-controls="pane-activity" aria-selected="false">Actividad</button>
-                            </li>
-                        </ul>
-
-                        <div class="tab-content">
-                            <div class="tab-pane fade show active" id="pane-details" role="tabpanel" aria-labelledby="tab-details" tabindex="0">
-                                <dl class="tr-specs">
-                                    <dt>Categoría</dt><dd>{{ $listing->category->name }}</dd>
-                                    <dt>Estado</dt><dd>{{ $listing->condition_label }}</dd>
-                                    @if ($listing->brand)<dt>Marca</dt><dd>{{ $listing->brand }}</dd>@endif
-                                    @if ($listing->city)<dt>Ubicación</dt><dd>{{ $listing->city }}</dd>@endif
-                                    <dt>Tipo</dt><dd>{{ $listing->type_label }}</dd>
-                                    <dt>Intercambio</dt><dd>{{ $listing->accepts_trade ? 'Acepta ofertas' : 'No acepta' }}</dd>
-                                    @if ($auction)<dt>Cierra</dt><dd class="tr-meta">{{ $auction->ends_at->format('d/m/Y H:i') }}</dd>@endif
-                                    <dt>Publicada</dt><dd class="tr-meta">{{ $listing->created_at->format('d/m/Y') }}</dd>
-                                </dl>
-                            </div>
-                            <div class="tab-pane fade" id="pane-activity" role="tabpanel" aria-labelledby="tab-activity" tabindex="0">
-                                @forelse ($bids as $bid)
-                                    <div class="tr-activity">
-                                        <x-avatar :user="$bid->user" size="sm" />
-                                        <span class="flex-grow-1">{{ $bid->user->name }}
-                                            <span class="tr-meta text-body-secondary d-block">{{ $bid->created_at->diffForHumans() }}</span>
-                                        </span>
-                                        <span class="tr-price">{{ \App\Support\Money::format($bid->amount) }}</span>
+                        <div class="accordion" id="listing-details">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#details-body" aria-expanded="true" aria-controls="details-body">Detalles</button>
+                                </h2>
+                                <div id="details-body" class="accordion-collapse collapse show">
+                                    <div class="accordion-body">
+                                        <dl class="tr-specs">
+                                            <dt>Categoría</dt><dd>{{ $listing->category->name }}</dd>
+                                            <dt>Estado</dt><dd>{{ $listing->condition_label }}</dd>
+                                            @if ($listing->brand)<dt>Marca</dt><dd>{{ $listing->brand }}</dd>@endif
+                                            @if ($listing->city)<dt>Ubicación</dt><dd>{{ $listing->city }}</dd>@endif
+                                            <dt>Tipo</dt><dd>{{ $listing->type_label }}</dd>
+                                            <dt>Intercambio</dt><dd>{{ $listing->accepts_trade ? 'Acepta ofertas' : 'No acepta' }}</dd>
+                                            @if ($auction)<dt>Cierra</dt><dd class="tr-meta">{{ $auction->ends_at->format('d/m/Y H:i') }}</dd>@endif
+                                            <dt>Publicada</dt><dd class="tr-meta">{{ $listing->created_at->format('d/m/Y') }}</dd>
+                                        </dl>
                                     </div>
-                                @empty
-                                    <p class="text-body-secondary mb-0">Todavía no hay actividad en esta publicación.</p>
-                                @endforelse
+                                </div>
                             </div>
                         </div>
 
@@ -150,3 +106,7 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    @vite('resources/js/app.js')
+@endpush

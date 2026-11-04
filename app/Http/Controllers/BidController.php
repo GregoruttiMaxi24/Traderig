@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\JsonResponse;
 
 class BidController extends Controller
 {
@@ -20,7 +21,7 @@ class BidController extends Controller
      * espera a que termine la primera y recién ahí valida contra el precio ya actualizado.
      * Los montos son pesos enteros, así que se comparan directamente con los operadores comunes.
      */
-    public function store(Request $request, Auction $auction): RedirectResponse
+       public function store(Request $request, Auction $auction): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'amount' => ['required', 'integer', 'min:1', 'max:6000000'],
@@ -63,6 +64,11 @@ class BidController extends Controller
 
             $locked->update(['current_price' => $amount]);
         });
+
+    // Responde con JSON para el panel de Vue o redirige a la publicación según el tipo de solicitud
+        if ($request->expectsJson()) {
+            return response()->json(['message' => '¡Tu puja fue registrada!'], 201);
+        }
 
         return redirect()->route('listings.show', $auction->listing_id)
             ->with('success', '¡Tu puja fue registrada!');

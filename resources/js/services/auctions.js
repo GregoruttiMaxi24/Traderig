@@ -15,3 +15,26 @@ export async function getAuctionState(url) {
 
     return response.json();
 }
+
+/**
+ * Envía una puja a Laravel. Si algo falla (monto bajo, subasta cerrada, etc.)tira un Error con el mensaje que devolvió el servidor.
+ */
+export async function placeBid(url, amount) {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': window.TradeRig.csrfToken, // se pone por el @CSRF que está en el formulario
+        },
+        body: JSON.stringify({ amount }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(data.errors?.amount?.[0] ?? data.message ?? 'No se pudo registrar la puja.');
+    }
+
+    return data;
+}

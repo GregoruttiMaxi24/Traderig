@@ -37,44 +37,20 @@
                             @if ($listing->status !== 'active')<span class="tr-badge">{{ \App\Models\Listing::STATUSES[$listing->status] ?? $listing->status }}</span>@endif
                         </div>
 
-                        @if ($auction)
-            {{-- este es el panel de Vue: precio actual, cuenta regresiva y últimas pujas --}}
-                    <div id="auction-panel" data-state-url="{{ route('auctions.state', $auction) }}"></div>
-                      @else
+                    @if ($auction)
+{{-- -----este es el panel de Vue: precio actual, cuenta regresiva y últimas pujas --}}
+                   <div id="auction-panel"
+                                 data-state-url="{{ route('auctions.state', $auction) }}"
+                                 data-bid-url="{{ route('auctions.bids.store', $auction) }}"
+                                 data-login-url="{{ route('login') }}"
+                                 data-seller-id="{{ $listing->user_id }}"></div>
+                        @else
                             <span class="tr-label">Precio</span>
                             <p class="tr-price display-6 mb-0">{{ \App\Support\Money::format($listing->price) }}</p>
-                     @endif
+                        @endif
 
-                 {{-- Acciones: puja (si la subasta está abierta) e intercambio --}}
+                        {{-- Acciones: intercambio (la puja está dentro del panel Vue) --}}
                         <div class="d-grid gap-2 my-4">
-                            @if ($auction && $auction->isOpen())
-                                @php $minBid = $auction->minimumNextBid(); @endphp
-                                @auth
-                                    @if (auth()->id() === $listing->user_id)
-                                        <p class="tr-meta text-body-secondary mb-0">Esta es tu subasta: no podés pujar en ella.</p>
-                                    @else
-
-                                        <form method="POST" action="{{ route('auctions.bids.store', $auction) }}" class="tr-bid-box" novalidate>
-                                            @csrf
-                                            <label for="amount" class="tr-bid-title">Hacé tu puja</label>
-                                            <div class="input-group input-group-lg has-validation">
-                                                <span class="input-group-text">$</span>
-                                                <input type="number" name="amount" id="amount"
-                                                    class="form-control @error('amount') is-invalid @enderror"
-                                                    min="{{ $minBid }}" max="6000000" step="1" value="{{ old('amount', $minBid) }}" required>
-                                                @error('amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                            </div>
-                                            <p class="tr-bid-hint">Puja mínima: <span class="tr-price">{{ \App\Support\Money::format($minBid) }}</span></p>
-                                            <button type="submit" class="btn btn-primary btn-lg w-100">Pujar</button>
-                                        </form>
-
-                                    @endif
-                                    
-                                @else
-                                    <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Ingresá para pujar</a>
-                                @endauth
-                            @endif
-
                             @if ($listing->accepts_trade)
                                 @if (Route::has('trade-offers.create'))
                                     <a href="{{ route('trade-offers.create', $listing) }}" class="btn btn-outline-tr btn-lg">Proponer intercambio</a>

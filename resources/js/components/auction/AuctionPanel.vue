@@ -10,6 +10,10 @@ const props = defineProps({
     bidUrl: { type: String, required: true },
     loginUrl: { type: String, required: true },
     sellerId: { type: Number, required: true },
+    startingPriceLabel: { type: String, required: true },
+    minIncrementLabel: { type: String, required: true },
+    initialBidCount: { type: Number, required: true },
+    initialIsOpen: { type: Boolean, required: true },
 });
 
 // Usuario con sesión (lo inyecta el layout) o null si es un visitante.
@@ -60,45 +64,71 @@ onUnmounted(() => clearInterval(timer));
 </script>
 
 <template>
-    <div>
-        <p v-if="error && !state" class="text-body-secondary mb-0">
-            No se pudo cargar el estado de la subasta.
-        </p>
-
-        <template v-if="state">
-            <span class="tr-label">{{ state.has_bids ? 'Puja actual' : 'Puja inicial' }}</span>
-            <p class="tr-price display-6 mb-1">{{ state.current_price_label }}</p>
-
-            <p class="tr-meta mb-0">
-
-                <template v-if="state.is_open">
-                    Cierra en <AuctionCountdown :ends-at="state.ends_at" @finished="loadState" />
-                </template>
-                <template v-else>Subasta cerrada</template>
-            </p>
-
-            <div v-if="state.is_open" class="mt-4">
-                <div v-if="bidOk" class="alert alert-success" role="alert">{{ bidOk }}</div>
-
-                <p v-if="user && user.id === sellerId" class="tr-meta text-body-secondary mb-0">
-                    Esta es tu subasta: no podés pujar en ella.
+    <div class="tr-auction-panel">
+        <section class="card tr-listing-detail__summary">
+            <header class="tr-listing-detail__summary-heading">
+                <h2>{{ state ? (state.is_open ? 'Subasta activa' : 'Subasta finalizada') : (initialIsOpen ? 'Subasta activa' : 'Subasta finalizada') }}</h2>
+                <span>{{ state ? state.bid_count : initialBidCount }} ofertas</span>
+            </header>
+            <div class="card-body">
+                <p v-if="error && !state" class="tr-auction-panel__error" role="alert">
+                    No se pudo cargar el estado de la subasta. Actualizá la página para volver a intentar.
                 </p>
-                <a v-else-if="!user" :href="loginUrl" class="btn btn-primary btn-lg w-100">Ingresá para pujar</a>
-                <BidForm
-                    v-else
-                    :minimum="state.minimum_next_bid"
-                    :minimum-label="state.minimum_next_bid_label"
-                    :error="bidError"
-                    :sending="sending"
-                    @submit="sendBid"
-                />
+
+                <template v-if="state">
+                    <span class="tr-label">{{ state.has_bids ? 'Puja actual' : 'Puja inicial' }}</span>
+                    <p class="tr-price tr-listing-detail__price">{{ state.current_price_label }}</p>
+
+                    <div class="tr-listing-detail__auction-facts">
+                        <div>
+                            <span>Precio de salida</span>
+                            <strong>{{ startingPriceLabel }}</strong>
+                        </div>
+                        <div>
+                            <span>Incremento mínimo</span>
+                            <strong>{{ minIncrementLabel }}</strong>
+                        </div>
+                    </div>
+
+                    <p class="tr-auction-panel__countdown">
+                        <template v-if="state.is_open">
+                            Cierra en <AuctionCountdown :ends-at="state.ends_at" @finished="loadState" />
+                        </template>
+                        <template v-else>Subasta cerrada</template>
+                    </p>
+
+                    <div v-if="state.is_open" class="tr-auction-panel__form">
+                        <div v-if="bidOk" class="alert alert-success" role="alert">{{ bidOk }}</div>
+
+                        <p v-if="user && user.id === sellerId" class="tr-auction-panel__notice">
+                            Esta es tu subasta. No podés pujar en ella.
+                        </p>
+                        <a v-else-if="!user" :href="loginUrl" class="btn btn-primary btn-lg w-100">Ingresá para pujar</a>
+                        <BidForm
+                            v-else
+                            :minimum="state.minimum_next_bid"
+                            :minimum-label="state.minimum_next_bid_label"
+                            :error="bidError"
+                            :sending="sending"
+                            @submit="sendBid"
+                        />
+                    </div>
+                </template>
             </div>
+        </section>
 
-            <h2 class="tr-subtitle mt-4 mb-3">Últimas pujas</h2>
-            <BidList :bids="state.bids" />
-
-        </template>
+        <section class="card tr-listing-detail__bid-history">
+            <header class="tr-listing-detail__bid-history-heading">
+                <h2>Historial de pujas</h2>
+                <span>{{ state ? state.bid_count : initialBidCount }} ofertas</span>
+            </header>
+            <div class="card-body">
+                <p v-if="error && !state" class="tr-auction-panel__error" role="alert">
+                    El historial no está disponible en este momento.
+                </p>
+                <BidList v-else-if="state" :bids="state.bids" />
+                <p v-else class="tr-auction-panel__loading" aria-live="polite">Cargando pujas...</p>
+            </div>
+        </section>
     </div>
-
-    
 </template>

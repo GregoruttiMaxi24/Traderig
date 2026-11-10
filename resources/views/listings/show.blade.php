@@ -5,104 +5,262 @@
 @section('content')
     @php
         $auction = $listing->auction;
-        $photo = $listing->photos->first();
+        $photo = $galleryPhotos->first();
     @endphp
 
-    <div class="container py-4">
-        <div class="row g-4 align-items-start">
-            {{-- Foto --}}
-            <div class="col-lg-7">
-                <div class="tr-detail-media">
-                    @if ($photo)
-                        <img src="{{ asset('storage/'.$photo->path) }}" alt="{{ $listing->title }}">
-                    @else
-                        <div class="tr-ph"><img src="{{ asset('img/logo-icon-light.png') }}" alt=""></div>
-                    @endif
-                </div>
+    <div class="container py-4 py-lg-5 tr-listing-detail">
+        <nav aria-label="Navegación de la publicación" class="tr-listing-detail__breadcrumb">
+            <a href="{{ route('home') }}">Inicio</a>
+            <span aria-hidden="true">/</span>
+            <span>{{ $listing->category->name }}</span>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">{{ $listing->title }}</span>
+        </nav>
+
+        <header class="tr-listing-detail__header">
+            <div class="tr-listing-detail__badges">
+                <span class="tr-badge tr-listing-detail__badge--type">{{ $listing->type_label }}</span>
+                <span class="tr-badge tr-listing-detail__badge--condition">{{ $listing->condition_label }}</span>
+                @if ($listing->accepts_trade)
+                    <span class="tr-badge tr-listing-detail__badge--trade">Acepta intercambio</span>
+                @endif
+                @if ($listing->status !== 'active')
+                    <span class="tr-badge tr-listing-detail__badge--status">
+                        {{ \App\Models\Listing::STATUSES[$listing->status] ?? $listing->status }}
+                    </span>
+                @endif
             </div>
+            <h1 class="tr-listing-detail__title">{{ $listing->title }}</h1>
+            <p class="tr-listing-detail__byline">
+                Publicado {{ $listing->created_at->format('d/m/Y') }}
+                @if ($listing->city)
+                    <span aria-hidden="true">·</span>
+                    {{ $listing->city }}
+                @endif
+                <span aria-hidden="true">·</span>
+                <a href="{{ route('users.show', $listing->user) }}">{{ $listing->user->name }}</a>
+            </p>
+        </header>
 
-            {{-- Panel de información --}}
-            <div class="col-lg-5">
-                <div class="card px-3 py-4">
-                    <div class="card-body p-4">
-                        <h1 class="tr-title h2 mb-1">{{ $listing->title }}</h1>
-                        <p class="mb-3">
-                            <a href="{{ route('users.show', $listing->user) }}">{{ $listing->user->name }}</a>
-                            <span class="tr-meta text-body-secondary"> · {{ $listing->category->name }}</span>
-                        </p>
-
-                        <div class="tr-badges tr-badges--inline mb-3">
-                            @if ($auction)<span class="tr-badge mb-3">Subasta</span>@endif
-                            @if ($listing->accepts_trade)<span class="tr-badge">Acepta intercambio</span>@endif
-                            @if ($listing->status !== 'active')<span class="tr-badge">{{ \App\Models\Listing::STATUSES[$listing->status] ?? $listing->status }}</span>@endif
-                        </div>
-
-                    @if ($auction)
-{{-- -----este es el panel de Vue: precio actual, cuenta regresiva y últimas pujas --}}
-                   <div id="auction-panel"
-                                 data-state-url="{{ route('auctions.state', $auction) }}"
-                                 data-bid-url="{{ route('auctions.bids.store', $auction) }}"
-                                 data-login-url="{{ route('login') }}"
-                                 data-seller-id="{{ $listing->user_id }}"></div>
-                        @else
-                            <span class="tr-label">Precio</span>
-                            <p class="tr-price display-6 mb-0">{{ \App\Support\Money::format($listing->price) }}</p>
-                        @endif
-
-                        {{-- Acciones: intercambio (la puja está dentro del panel Vue) --}}
-                        <div class="d-grid gap-2 my-4">
-                            @if ($listing->accepts_trade)
-                                @if (Route::has('trade-offers.create'))
-                                    <a href="{{ route('trade-offers.create', $listing) }}" class="btn btn-outline-tr btn-lg">Proponer intercambio</a>
-                                @else
-                                    <button type="button" class="btn btn-outline-tr btn-lg" disabled>Proponer intercambio</button>
-                                @endif
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-7">
+                <section class="tr-gallery" aria-label="Fotos de {{ $listing->title }}" data-listing-gallery>
+                    @if ($photo)
+                        <div class="tr-gallery__main">
+                            @foreach ($galleryPhotos as $galleryPhoto)
+                                <img
+                                    src="{{ asset('storage/'.$galleryPhoto->path) }}"
+                                    alt="{{ $listing->title }}. Foto {{ $loop->iteration }}"
+                                    class="tr-gallery__image @if ($loop->first) is-active @endif"
+                                    data-gallery-image
+                                    @if (! $loop->first) hidden @endif
+                                >
+                            @endforeach
+                            <button type="button" class="tr-gallery__expand" data-gallery-open aria-label="Ampliar foto">
+                                Ampliar
+                            </button>
+                            @if ($galleryPhotos->count() > 1)
+                                <button
+                                    type="button"
+                                    class="tr-gallery__step tr-gallery__step--previous"
+                                    data-gallery-previous
+                                    aria-label="Foto anterior"
+                                >
+                                    <span aria-hidden="true">‹</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="tr-gallery__step tr-gallery__step--next"
+                                    data-gallery-next
+                                    aria-label="Foto siguiente"
+                                >
+                                    <span aria-hidden="true">›</span>
+                                </button>
+                                <span class="tr-gallery__counter" data-gallery-counter aria-live="polite">
+                                    1 / {{ $galleryPhotos->count() }}
+                                </span>
                             @endif
                         </div>
+                        @if ($galleryPhotos->count() > 1)
+                            <div class="tr-gallery__thumbs" role="group" aria-label="Elegir foto">
+                                @foreach ($galleryPhotos as $galleryPhoto)
+                                    <button
+                                        type="button"
+                                        class="tr-gallery__thumb @if ($loop->first) is-active @endif"
+                                        data-gallery-thumb
+                                        data-photo-index="{{ $loop->index }}"
+                                        aria-label="Ver foto {{ $loop->iteration }}"
+                                        aria-pressed="{{ $loop->first ? 'true' : 'false' }}"
+                                    >
+                                        <img src="{{ asset('storage/'.$galleryPhoto->path) }}" alt="" loading="lazy">
+                                        <span>{{ $loop->first ? 'Foto principal' : 'Foto '.$loop->iteration }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
+                        <dialog class="tr-gallery__lightbox" data-gallery-dialog aria-label="Foto ampliada">
+                            <div class="tr-gallery__lightbox-toolbar">
+                                @if ($galleryPhotos->count() > 1)
+                                    <button type="button" data-gallery-previous aria-label="Foto anterior">Anterior</button>
+                                @else
+                                    <span></span>
+                                @endif
+                                <button type="button" data-gallery-close>Cerrar</button>
+                                @if ($galleryPhotos->count() > 1)
+                                    <button type="button" data-gallery-next aria-label="Foto siguiente">Siguiente</button>
+                                @endif
+                            </div>
+                            <img
+                                src="{{ asset('storage/'.$photo->path) }}"
+                                alt="{{ $listing->title }}. Foto 1"
+                                data-gallery-dialog-image
+                            >
+                        </dialog>
+                    @else
+                        <div class="tr-gallery__main">
+                            <div class="tr-ph"><img src="{{ asset('img/logo-icon-light.png') }}" alt=""></div>
+                        </div>
+                        <p class="tr-gallery__empty">El vendedor todavía no agregó fotos.</p>
+                    @endif
+                </section>
 
-                        <h2 class="tr-subtitle py-3">Descripción</h2>
-                        <p class="mb-4">{{ $listing->description }}</p>
+                <section class="card tr-listing-detail__section tr-listing-detail__section--description">
+                    <div class="card-body">
+                        <h2 class="tr-listing-detail__section-title">Descripción del producto</h2>
+                        <p class="tr-listing-detail__description">{{ $listing->description }}</p>
+                        @if ($listing->seller_notes)
+                            <div class="tr-listing-detail__seller-notes">
+                                <h3>Observaciones del vendedor</h3>
+                                <p>{{ $listing->seller_notes }}</p>
+                            </div>
+                        @endif
+                    </div>
+                </section>
 
-                        <div class="accordion" id="listing-details">
-                            <div class="accordion-item">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#details-body" aria-expanded="true" aria-controls="details-body">Detalles</button>
-                                </h2>
-                                <div id="details-body" class="accordion-collapse collapse show">
-                                    <div class="accordion-body">
-                                        <dl class="tr-specs">
-                                            <dt>Categoría</dt><dd>{{ $listing->category->name }}</dd>
-                                            <dt>Estado</dt><dd>{{ $listing->condition_label }}</dd>
-                                            @if ($listing->brand)<dt>Marca</dt><dd>{{ $listing->brand }}</dd>@endif
-                                            @if ($listing->city)<dt>Ubicación</dt><dd>{{ $listing->city }}</dd>@endif
-                                            <dt>Tipo</dt><dd>{{ $listing->type_label }}</dd>
-                                            <dt>Intercambio</dt><dd>{{ $listing->accepts_trade ? 'Acepta ofertas' : 'No acepta' }}</dd>
-                                            @if ($auction)<dt>Cierra</dt><dd class="tr-meta">{{ $auction->ends_at->format('d/m/Y H:i') }}</dd>@endif
-                                            <dt>Publicada</dt><dd class="tr-meta">{{ $listing->created_at->format('d/m/Y') }}</dd>
-                                        </dl>
-                                    </div>
+                <section class="card tr-listing-detail__section tr-listing-detail__section--specifications">
+                    <div class="card-body">
+                        <h2 class="tr-listing-detail__section-title">Especificaciones</h2>
+                        <dl class="tr-listing-detail__specs">
+                            @if ($listing->brand)
+                                <div class="tr-listing-detail__spec-row">
+                                    <dt>Marca</dt>
+                                    <dd>{{ $listing->brand }}</dd>
                                 </div>
+                            @endif
+
+                            @forelse ($listing->specifications ?? [] as $specification)
+                                <div class="tr-listing-detail__spec-row">
+                                    <dt>{{ $specification['name'] }}</dt>
+                                    <dd>{{ $specification['value'] }}</dd>
+                                </div>
+                            @empty
+                                <div class="tr-listing-detail__spec-row">
+                                    <dt>Especificaciones</dt>
+                                    <dd>El vendedor no agregó características técnicas.</dd>
+                                </div>
+                            @endforelse
+
+                            <div class="tr-listing-detail__spec-row">
+                                <dt>Categoría</dt>
+                                <dd>{{ $listing->category->name }}</dd>
                             </div>
+
+                            <div class="tr-listing-detail__spec-row">
+                                <dt>Estado</dt>
+                                <dd>{{ $listing->condition_label }}</dd>
+                            </div>
+
+                            <div class="tr-listing-detail__spec-row">
+                                <dt>Tipo de publicación</dt>
+                                <dd>{{ $listing->type_label }}</dd>
+                            </div>
+
+                            @if ($listing->city)
+                                <div class="tr-listing-detail__spec-row">
+                                    <dt>Ubicación</dt>
+                                    <dd>{{ $listing->city }}</dd>
+                                </div>
+                            @endif
+
+                            <div class="tr-listing-detail__spec-row">
+                                <dt>Intercambio</dt>
+                                <dd>{{ $listing->accepts_trade ? 'Acepta propuestas' : 'No acepta' }}</dd>
+                            </div>
+
+                            @if ($auction)
+                                <div class="tr-listing-detail__spec-row">
+                                    <dt>Finaliza</dt>
+                                    <dd>{{ $auction->ends_at->format('d/m/Y H:i') }}</dd>
+                                </div>
+                            @endif
+                        </dl>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="col-lg-5">
+                @if ($auction)
+                    <div
+                        id="auction-panel"
+                        data-state-url="{{ route('auctions.state', $auction) }}"
+                        data-bid-url="{{ route('auctions.bids.store', $auction) }}"
+                        data-login-url="{{ route('login') }}"
+                        data-seller-id="{{ $listing->user_id }}"
+                        data-starting-price-label="{{ \App\Support\Money::format($auction->starting_price) }}"
+                        data-min-increment-label="{{ \App\Support\Money::format($auction->min_increment) }}"
+                        data-bid-count="{{ $auction->bids_count }}"
+                        data-initial-is-open="{{ $auction->isOpen() ? 'true' : 'false' }}"
+                    ></div>
+                @else
+                    <section class="card tr-listing-detail__summary tr-listing-detail__summary--sale">
+                        <div class="card-body">
+                            <span class="tr-label">Precio de venta</span>
+                            <p class="tr-price tr-listing-detail__price">{{ \App\Support\Money::format($listing->price) }}</p>
                         </div>
+                    </section>
+                @endif
 
-                        <hr class="tr-divider">
+                @if ($listing->accepts_trade)
+                    <section class="card tr-listing-detail__trade">
+                        <div class="card-body">
+                            @if (Route::has('trade-offers.create'))
+                            <a href="{{ route('trade-offers.create', $listing) }}" class="btn btn-primary w-100">
+                                Proponer intercambio
+                            </a>
+                            @else
+                                <button type="button" class="btn btn-outline-tr w-100" disabled>
+                                    Proponer intercambio
+                                </button>
+                            @endif
+                        </div>
+                    </section>
+                @endif
 
-                        <h2 class="tr-subtitle my-3">Vendedor</h2>
-                        <div class="d-flex align-items-center gap-3">
+                <section class="card tr-listing-detail__seller">
+                    <div class="card-body">
+                        <h2 class="tr-listing-detail__section-title">Información del vendedor</h2>
+                        <div class="tr-listing-detail__seller-profile">
                             <x-avatar :user="$listing->user" size="lg" />
-                            <div class="flex-grow-1">
-                                <div class="fw-semibold">{{ $listing->user->name }}</div>
-                                <div class="tr-meta text-body-secondary">{{ $sellerListingsCount }} {{ $sellerListingsCount === 1 ? 'publicación activa' : 'publicaciones activas' }}</div>
+                            <div>
+                                <a class="tr-listing-detail__seller-name" href="{{ route('users.show', $listing->user) }}">
+                                    {{ $listing->user->name }}
+                                </a>
+                                @if ($listing->city)
+                                    <p class="tr-listing-detail__seller-location">{{ $listing->city }}</p>
+                                @endif
+                                <p>
+                                    {{ $sellerListingsCount }}
+                                    {{ $sellerListingsCount === 1 ? 'publicación activa' : 'publicaciones activas' }}
+                                </p>
                             </div>
                         </div>
-
-                        <div class="d-flex align-items-center gap-3 mt-5">
-                            <button type="button" class="btn btn-outline-tr" data-copy-link>Copiar enlace</button>
+                        <div class="tr-listing-detail__seller-actions">
                             <a href="{{ route('users.show', $listing->user) }}" class="btn btn-outline-tr">Ver perfil</a>
+                            <button type="button" class="btn btn-outline-tr" data-copy-link>Copiar enlace</button>
                         </div>
                     </div>
-                </div>
-            </div>
+                </section>
+            </aside>
         </div>
     </div>
 @endsection

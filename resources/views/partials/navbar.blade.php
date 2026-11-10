@@ -2,7 +2,7 @@
     <div class="container">
         {{-- Isologotipo vertical monocromático: el que el manual de marca indica sobre fondo oscuro --}}
         <a class="navbar-brand" href="{{ route('home') }}">
-            <img src="{{ asset('img/logo-full-light.png') }}" alt="TRADERIG" height="52">
+            <img src="{{ asset('img/logo-full-light.png') }}" alt="TRADERIG" height="40">
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
@@ -16,17 +16,18 @@
                     <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Inicio</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('home') }}#categorias">Categorías</a>
+                    <a class="nav-link" href="{{ Route::has('listings.index') ? route('listings.index') : route('home').'#publicaciones' }}">Productos</a>
                 </li>
                 {{-- Estos enlaces aparecen solos cuando se creen las rutas en las próximas fases --}}
                 @if (Route::has('listings.index'))
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('listings.index') ? 'active' : '' }}" href="{{ route('listings.index') }}">Catálogo</a>
+                        <a class="nav-link" href="{{ route('home') }}#categorias">Categorías</a>
                     </li>
                 @endif
-                @if (Route::has('auctions.index'))
-                    <li class="nav-item"><a class="nav-link" href="{{ route('auctions.index') }}">Subastas</a></li>
-                @endif
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ Route::has('auctions.index') ? route('auctions.index') : route('home').'#subastas' }}">Subastas</a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('home') }}#intercambios">Intercambios</a></li>
                 @auth
                     @if (Route::has('dashboard'))
                         <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Mi panel</a></li>
@@ -36,6 +37,7 @@
 
             <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
                 @auth
+                    <a class="btn btn-accent btn-sm" href="{{ route('listings.create') }}">+ Publicar componente</a>
                     <div class="dropdown">
                         <button class="btn btn-outline-tr dropdown-toggle d-flex align-items-center gap-2" type="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">

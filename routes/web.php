@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BidController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ProfileController;
@@ -10,8 +12,6 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\BidController;
-use App\Http\Controllers\AuctionController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -19,11 +19,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/publicaciones/{listing}', [ListingController::class, 'show'])
     ->whereNumber('listing')->name('listings.show');
 Route::get('/subastas/{auction}/estado', [AuctionController::class, 'state'])
-    ->whereNumber('auction')->name('auctions.state');    
+    ->whereNumber('auction')->name('auctions.state');
 Route::get('/vendedores/{user}', [UserProfileController::class, 'show'])
     ->whereNumber('user')->name('users.show');
 
-    
 // Solo para visitantes (si ya ingresaste, te lleva al inicio)
 Route::middleware('guest')->group(function () {
     Route::get('/registro', [RegisterController::class, 'show'])->name('register');
@@ -41,10 +40,12 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
+    Route::get('/publicaciones/crear', [ListingController::class, 'create'])->name('listings.create');
+    Route::post('/publicaciones', [ListingController::class, 'store'])->name('listings.store');
 
-    //-- pujas en subastas ---
-        Route::post('/subastas/{auction}/pujas', [BidController::class, 'store'])
-        ->whereNumber('auction')->name('auctions.bids.store');  
+    // -- pujas en subastas ---
+    Route::post('/subastas/{auction}/pujas', [BidController::class, 'store'])
+        ->whereNumber('auction')->name('auctions.bids.store');
 
     // Solo administradores
     Route::middleware(EnsureUserIsAdmin::class)->prefix('admin')->group(function () {

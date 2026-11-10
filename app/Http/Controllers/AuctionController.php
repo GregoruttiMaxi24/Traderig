@@ -19,7 +19,7 @@ class AuctionController extends Controller
         // Cargar la publicación y las pujas (con su usuario) en pocas consultas.
         $auction->load(['listing', 'bids.user']);
 
-// Si la publicación no está activa, la subasta no se muestra
+        // Si la publicación no está activa, la subasta no se muestra
         abort_if($auction->listing->status !== 'active', 404);
 
         $minimum = $auction->minimumNextBid();
@@ -28,6 +28,7 @@ class AuctionController extends Controller
             'is_open' => $auction->isOpen(),
             'ends_at' => $auction->ends_at->toIso8601String(),
             'has_bids' => $auction->bids->isNotEmpty(),
+            'bid_count' => $auction->bids->count(),
             'current_price' => $auction->current_price,
             'current_price_label' => Money::format($auction->current_price),
             'minimum_next_bid' => $minimum,

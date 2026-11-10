@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BidController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ProfileController;
@@ -14,9 +16,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Detalle de publicación y página pública del vendedor.
-// whereNumber evita choques con rutas como /publicaciones/crear (Fase 4).
 Route::get('/publicaciones/{listing}', [ListingController::class, 'show'])
     ->whereNumber('listing')->name('listings.show');
+Route::get('/subastas/{auction}/estado', [AuctionController::class, 'state'])
+    ->whereNumber('auction')->name('auctions.state');
 Route::get('/vendedores/{user}', [UserProfileController::class, 'show'])
     ->whereNumber('user')->name('users.show');
 
@@ -36,6 +39,13 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    Route::get('/publicaciones/crear', [ListingController::class, 'create'])->name('listings.create');
+    Route::post('/publicaciones', [ListingController::class, 'store'])->name('listings.store');
+
+    // -- pujas en subastas ---
+    Route::post('/subastas/{auction}/pujas', [BidController::class, 'store'])
+        ->whereNumber('auction')->name('auctions.bids.store');
 
     // Solo administradores
     Route::middleware(EnsureUserIsAdmin::class)->prefix('admin')->group(function () {

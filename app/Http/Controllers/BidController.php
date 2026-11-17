@@ -35,6 +35,9 @@ class BidController extends Controller
         // validate() devuelve el valor como texto; se lo pasa a número entero.
         $amount = (int) $data['amount'];
 
+    //Si la subasta venció, se cierra y la validación de abajo rechaza la puja.
+        $auction->closeIfExpired();
+
         DB::transaction(function () use ($auction, $request, $amount) {
             // Releemos la subasta bloqueándola: a partir de acá los datos son los definitivos.
             $locked = Auction::lockForUpdate()->findOrFail($auction->id);

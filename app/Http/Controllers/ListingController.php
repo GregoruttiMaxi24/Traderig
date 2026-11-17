@@ -143,7 +143,12 @@ class ListingController extends Controller
         abort_unless($canSee, 404);
 
         $listing->load(['category', 'user', 'photos', 'mainPhoto', 'auction']);
-        $listing->auction?->loadCount('bids');
+
+     //solo las publicaciones de tipo subasta tienen subasta.
+        if ($listing->auction !== null) {
+            $listing->auction->closeIfExpired();
+            $listing->auction->loadCount('bids');
+        }
 
         $sellerListingsCount = $listing->user->listings()->active()->count();
         $galleryPhotos = $listing->photos

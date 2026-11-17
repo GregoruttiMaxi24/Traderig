@@ -220,6 +220,7 @@
                     </section>
                 @endif
 
+        
                 @if ($listing->accepts_trade)
                     <section class="card tr-listing-detail__trade">
                         <div class="card-body">
@@ -235,6 +236,9 @@
                         </div>
                     </section>
                 @endif
+
+
+        {{-- La información del vendedor         --}}
 
                 <section class="card tr-listing-detail__seller">
                     <div class="card-body">
@@ -254,7 +258,25 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="tr-listing-detail__seller-actions">
+
+                        
+                         <div class="tr-listing-detail__seller-actions">
+                            @if ($listing->status === 'active')
+                                @guest
+                                    <a href="{{ route('login') }}" class="btn btn-primary">Ingresá para chatear</a>
+                                @endguest
+
+                                @auth
+                                    @if (auth()->id() !== $listing->user_id)
+                                        <form method="POST" action="{{ route('chats.start', $listing) }}">
+                                            @csrf
+                                            
+                                            <button type="submit" class="btn btn-primary">Enviar un mensaje</button>
+                                        </form>
+                                    @endif
+                                @endauth
+                            @endif
+
                             <a href="{{ route('users.show', $listing->user) }}" class="btn btn-outline-tr">Ver perfil</a>
                             <button type="button" class="btn btn-outline-tr" data-copy-link>Copiar enlace</button>
                         </div>

@@ -65,4 +65,19 @@ class Conversation extends Model
     {
         return $user->id === $this->buyer_id || $user->id === $this->seller_id;
     }    
+
+/**
+*  Devuelve al otro participante de la conversación (con quién es que habla el usuario).
+* Si el usuario es el comprador, es el vendedor- si es el vendedor, es el comprador.
+*/
+    public function otherParticipant(User $user): User
+    {
+        if ($user->id === $this->buyer_id) {
+            return $this->seller;
+        }
+
+          return $this->buyer;
+    }
+
+    
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="dark">
+<html lang="es" data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,15 @@
     @include('partials.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ asset('js/traderig.js') }}"></script>
+     <script src="{{ asset('js/traderig.js') }}"></script>
+    <script>
+        // Datos de la sesión para los componentes Vue (null si nadie ingresó).
+        @auth
+        window.TradeRig.user = { id: {{ auth()->id() }}, name: @json(auth()->user()->name) };
+        @else
+        window.TradeRig.user = null;
+        @endauth
+    </script>
     @stack('scripts')
 </body>
 </html>

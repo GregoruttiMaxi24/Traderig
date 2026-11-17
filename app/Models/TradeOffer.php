@@ -21,10 +21,14 @@ class TradeOffer extends Model
         'cash_direction',
     ];
 
+   /**
+     * Indica cómo se convierten los campos al leerlos de la base de datos.
+     * La diferencia de $ es un entero, en pesos, y la fecha de respuesta se trata como fecha.
+     */
     protected function casts(): array
     {
         return [
-            'cash_amount' => 'decimal:2',
+            'cash_amount' => 'integer',
             'responded_at' => 'datetime',
         ];
     }

@@ -90,12 +90,25 @@ onUnmounted(() => clearInterval(timer));
                         </div>
                     </div>
 
-                    <p class="tr-auction-panel__countdown">
+                                        <p class="tr-auction-panel__countdown">
                         <template v-if="state.is_open">
                             Cierra en <AuctionCountdown :ends-at="state.ends_at" @finished="loadState" />
                         </template>
                         <template v-else>Subasta cerrada</template>
                     </p>
+
+                    <!-- EL resultado FINAL: que solo se muestra cuando la subasta ya cerró -->
+                    <template v-if="!state.is_open">
+                        <p v-if="user && user.id === state.winner_id" class="tr-auction-panel__notice">
+                            ¡Ganaste esta subasta por {{ state.current_price_label }}!
+                        </p>
+                        <p v-else-if="state.winner_name" class="tr-auction-panel__notice">
+                            Ganó {{ state.winner_name }} con una puja de {{ state.current_price_label }}.
+                        </p>
+                        <p v-else class="tr-auction-panel__notice">
+                            La subasta terminó sin pujas.
+                        </p>
+                    </template>
 
                     <div v-if="state.is_open" class="tr-auction-panel__form">
                         <div v-if="bidOk" class="alert alert-success" role="alert">{{ bidOk }}</div>

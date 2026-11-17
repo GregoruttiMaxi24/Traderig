@@ -16,9 +16,9 @@ return new class extends Migration
     {
         Schema::create('conversations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('listing_id')->constrained()->cascadeOnDelete(); //tabla listings
-            $table->foreignId('buyer_id')->constrained('users')->cascadeOnDelete(); // fk comprador que apunta al id de la tabla users
-            $table->foreignId('seller_id')->constrained('users')->cascadeOnDelete(); // fk vendedor
+            $table->foreignId('listing_id')->constrained(); //tabla listings
+            $table->foreignId('buyer_id')->constrained('users'); // fk comprador que apunta al id de la tabla users
+            $table->foreignId('seller_id')->constrained('users'); // fk vendedor
             $table->timestamps();
 
             $table->unique(['listing_id', 'buyer_id']);  //Para evittar que se creen conversaciones duplicadas si el usuario hace clic varias veces en el botón del chat sobre el mismo producto.

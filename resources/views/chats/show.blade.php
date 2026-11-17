@@ -10,7 +10,7 @@
             <a href="{{ route('chats.index') }}" class="tr-meta"> Volver a mis chats</a>
 
             <h1 class="h3 mt-2 mb-1">Chat con {{ $conversation->otherParticipant(auth()->user())->name }}</h1>
-            
+
             <p class="mb-0">
                 Sobre:
                 <a href="{{ route('listings.show', $conversation->listing) }}">{{ $conversation->listing->title }}</a>
@@ -35,3 +35,7 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    @vite('resources/js/app.js')
+@endpush

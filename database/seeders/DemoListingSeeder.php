@@ -80,9 +80,15 @@ class DemoListingSeeder extends Seeder
 
     private function bid(string $title, array $bids): void
     {
-        $auction = \App\Models\Listing::where('title', $title)->first()?->auction;
+         $listing = \App\Models\Listing::where('title', $title)->first();
 
-        if (! $auction || $auction->bids()->exists()) {
+        if (! $listing){
+            return;
+        }
+
+        $auction = $listing->auction;
+
+        if (! $auction || $auction->bids()->exists()){
             return;
         }
 

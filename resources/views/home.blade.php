@@ -70,15 +70,17 @@
 
             <div class="row g-3">
                 @forelse ($trades as $listing)
-                    <div class="col-lg-6">
-                        <a href="{{ route('listings.show', $listing) }}" class="tr-home-trade">
-                            <div class="tr-home-trade__media {{ $listing->mainPhoto?->path ? '' : 'is-placeholder' }}">
-                                @if ($listing->mainPhoto?->path)
-                                    <img src="{{ asset('storage/'.$listing->mainPhoto->path) }}" alt="" loading="lazy">
-                                @else
-                                    <img src="{{ asset('img/logo-icon-light.png') }}" alt="" loading="lazy">
-                                @endif
-                            </div>
+                   
+                        <div class="col-lg-6">
+                            <a href="{{ route('listings.show', $listing) }}" class="tr-home-trade">
+                                 <div class="tr-home-trade__media {{ $listing->mainPhoto ? '' : 'is-placeholder' }}">
+                                        @if ($listing->mainPhoto)
+                                            <img src="{{ asset('storage/'.$listing->mainPhoto->path) }}" alt="" loading="lazy">
+                                        @else
+                                            <img src="{{ asset('img/logo-icon-light.png') }}" alt="" loading="lazy">
+                                        @endif
+                                 </div>
+
                             <div class="tr-home-trade__content">
                                 <span class="tr-badge">Intercambio</span>
                                 <h3>{{ $listing->title }}</h3>

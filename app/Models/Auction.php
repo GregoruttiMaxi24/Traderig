@@ -5,15 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Auction extends Model
 {
-    protected $fillable = [
+     protected $fillable = [
         'listing_id',
         'starting_price',
         'min_increment',
         'current_price',
         'ends_at',
+        'status',
+        'winner_id',
+        'closed_at',
     ];
 
     /**
@@ -63,6 +67,42 @@ class Auction extends Model
         return $this->status === 'open' && $this->ends_at->isFuture();
     }
 
+        /**
+     * Cierra la subasta si ya venció y todavía figura como abierta.
+     * El ganador es quien hizo la puja más alta; si nadie pujó, queda sin ganador.
+     * Se usa un bloqueo para que, si dos personas la consultan a la vez, se cierre una sola vez.
+     */
+    public function closeIfExpired(): void
+    {
+        if ($this->status !== 'open' || $this->ends_at->isFuture()) {
+            return;
+        }
+
+        DB::transaction(function () {
+            $locked = static::lockForUpdate()->findOrFail($this->id);
+
+            if ($locked->status === 'open') {
+                // bids() ya viene ordenadas de mayor a menor monto
+                                $topBid = $locked->bids()->first();
+
+                // Si nadie pujó, no hay ganador.
+                $winnerId = null;
+
+                if ($topBid !== null) {
+                    $winnerId = $topBid->user_id;
+                }
+
+                $locked->update([
+                    'status' => 'closed',
+                    'winner_id' => $winnerId,
+                    'closed_at' => now(),
+                ]);
+            }
+        });
+
+        // Se vuelve a leer para que este objeto tenga los datos ya cerrados
+        $this->refresh();
+    }
 
      /**
      * Calcula cuánto hay que ofertar como mínimo en la próxima puja.

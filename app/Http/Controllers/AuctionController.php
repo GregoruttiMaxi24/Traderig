@@ -16,8 +16,12 @@ class AuctionController extends Controller
      */
     public function state(Auction $auction): JsonResponse
     {
-        // Cargar la publicación y las pujas (con su usuario) en pocas consultas.
-        $auction->load(['listing', 'bids.user']);
+
+    // Si ya venció, se cierra antes de leer los datos. Es el cierre perezoso (O lazy loading.
+        $auction->closeIfExpired();
+
+    //esto carga la publicación y las pujas junto con los usuarios que las realizaron
+        $auction->load(['listing', 'bids.user', 'winner']);
 
         // Si la publicación no está activa, la subasta no se muestra
         abort_if($auction->listing->status !== 'active', 404);
@@ -26,6 +30,9 @@ class AuctionController extends Controller
 
         return response()->json([
             'is_open' => $auction->isOpen(),
+              'is_closed' => $auction->status === 'closed',
+              'winner_name' => $auction->winner ? $auction->winner->name : null,
+              'winner_id' => $auction->winner_id,
             'ends_at' => $auction->ends_at->toIso8601String(),
             'has_bids' => $auction->bids->isNotEmpty(),
             'bid_count' => $auction->bids->count(),

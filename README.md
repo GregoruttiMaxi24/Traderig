@@ -84,7 +84,7 @@ No se agregó una dependencia de frontend para implementar la carga de fotos o l
 
 ## Preparar el proyecto localmente
 
-Requisitos: PHP compatible con la versión indicada en `composer.json`, Composer, Node.js con npm y una base de datos configurada.
+Requisitos: PHP 8.3 o superior, Composer, Node.js LTS (20.19 o superior) con npm y MariaDB con una base de datos vacía llamada `traderig`.
 
 1. Instalar las dependencias de PHP:
 
@@ -105,10 +105,10 @@ Requisitos: PHP compatible con la versión indicada en `composer.json`, Composer
    Copy-Item .env.example .env
    ```
 
-3. Configurar la conexión a la base de datos en `.env` y ejecutar las migraciones:
+3. Configurar la conexión a la base de datos en `.env` (`DB_USERNAME`, `DB_PASSWORD` y `DB_PORT` si tu MariaDB no usa el 3306) y ejecutar las migraciones con los datos de prueba:
 
    ```bash
-   php artisan migrate
+   php artisan migrate --seed
    ```
 
 4. Instalar las dependencias de JavaScript y compilar los recursos:
@@ -124,11 +124,19 @@ Requisitos: PHP compatible con la versión indicada en `composer.json`, Composer
    php artisan storage:link
    ```
 
-6. Iniciar el servidor local:
+6. Levantar el proyecto con **dos terminales abiertas a la vez**:
 
    ```bash
    php artisan serve
    ```
+
+   ```bash
+   npm run dev
+   ```
+
+   La primera sirve el sitio y la segunda compila el JavaScript (Vite). Si solo querés probar el sitio sin modificar JavaScript, alcanza con correr una vez `npm run build`.
+
+7. Abrir http://127.0.0.1:8000
 
 ## Pruebas
 
@@ -145,3 +153,23 @@ php artisan test
 ```
 
 Las pruebas de publicaciones cubren el acceso autenticado, la validación y almacenamiento de fotos, el límite de cantidad y tamaño, la validación y persistencia de especificaciones y observaciones, la creación de subastas y la galería del detalle. `AuctionControllerTest` verifica que el estado de la subasta incluya la cantidad de pujas y que no se publique si el componente está inactivo.
+
+## Usuarios de prueba
+
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Administrador | admin@traderig.test | password |
+| Usuario | usuario@traderig.test | password |
+
+Los datos de ejemplo (publicaciones y subastas) se cargan solo con `APP_ENV=local`.
+Para volver a empezar con la base limpia: `php artisan migrate:fresh --seed`.
+
+## Cómo trabajamos
+
+- Nadie trabaja directo en `main`.
+- Antes de empezar: `git checkout main` y `git pull`.
+- Cada tarea en su propia rama: `git checkout -b feature/nombre-de-la-tarea`.
+- Commits chicos y con mensaje claro.
+- Al terminar: `git push` y abrir un Pull Request. Otra persona lo revisa antes de unirlo a `main`.
+- Nunca se modifica una migración ya subida: se crea una nueva.
+- El archivo `.env` no se sube nunca (cada uno tiene el suyo).

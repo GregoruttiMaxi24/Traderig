@@ -270,7 +270,7 @@
                                     @if (auth()->id() !== $listing->user_id)
                                         <form method="POST" action="{{ route('chats.start', $listing) }}">
                                             @csrf
-                                            
+
                                             <button type="submit" class="btn btn-primary">Enviar un mensaje</button>
                                         </form>
                                     @endif
@@ -285,8 +285,12 @@
             </aside>
         </div>
     </div>
-@endsection
 
+  
+@endsection
+ 
 @push('scripts')
-    @vite('resources/js/app.js')
-@endpush
+        @vite('resources/js/app.js')
+    @endpush
+
+

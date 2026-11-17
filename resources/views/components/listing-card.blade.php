@@ -1,6 +1,6 @@
 @props(['listing'])
 @php
-    $photo = $listing->mainPhoto?->path;
+   $photo = $listing->mainPhoto ? $listing->mainPhoto->path : null;
     $auction = $listing->isAuction() ? $listing->auction : null;
     $hasBids = $auction && $auction->current_price > $auction->starting_price;
 @endphp

@@ -1,17 +1,22 @@
 <script setup>
 import { ref, watch } from 'vue';
+import LoaderButton from '../form/LoaderButton.vue';
 
 const props = defineProps({
-    error: { type: String, default: '' },
-    sending: { type: Boolean, default: false },
+    error: { 
+        type: String, 
+        default: '' },
+    sending: { 
+        type: Boolean, 
+        default: false },
 });
 
-//emite el evento al contenedor con el texto que el usuario quiere enviar
+//emitir el evento al contenedor con el texto que el usuario quiere enviar
 const emit = defineEmits(['submit']);
 
 const text = ref('');
 
-//Cuando termina de enviar sin error, vaciar la caja para escribir el siguiente mensaje
+//Cuando termina de enviar sin error, vaciar la caja para escribir el proximo mensaje
 watch(() => props.sending, (isSending, wasSending) => {
 
     if (wasSending && !isSending && props.error === '') {
@@ -36,9 +41,8 @@ watch(() => props.sending, (isSending, wasSending) => {
                 maxlength="1000"
                 aria-label="Mensaje"
             >
-            <button type="submit" class="btn btn-primary" :disabled="sending">
-                {{ sending ? 'Enviando...' : 'Enviar' }}
-            </button>
+               <LoaderButton :loading="sending">Enviar</LoaderButton>
+               
             <div v-if="error" class="invalid-feedback">{{ error }}</div>
         </div>
         

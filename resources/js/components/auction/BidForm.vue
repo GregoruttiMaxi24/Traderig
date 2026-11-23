@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue';
+import LoaderButton from '../form/LoaderButton.vue';
 
 const props = defineProps({
     minimum: { type: Number, required: true },
@@ -47,9 +48,8 @@ watch(() => props.minimum, (newMinimum) => {
 
         <p class="tr-bid-hint">Puja mínima: <span class="tr-price">{{ minimumLabel }}</span></p>
 
-        <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="sending">
-            {{ sending ? 'Enviando...' : 'Pujar' }}
-        </button>
+         <LoaderButton :loading="sending" class="btn-lg w-100">Pujar</LoaderButton>
+
     </form>
 
 </template>

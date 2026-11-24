@@ -9,6 +9,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TradeOfferController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserIsAdmin;
@@ -55,13 +56,26 @@ Route::post('/publicaciones/{listing}/chat', [ChatController::class, 'start'])
 Route::get('/chats', [ChatController::class, 'index'])->name('chats.index');     
 
 Route::get('/chats/{conversation}', [ChatController::class, 'show'])
-        ->whereNumber('conversation')->name('chats.show');
+        ->whereNumber('conversation')
+        ->name('chats.show');
 
 Route::get('/chats/{conversation}/mensajes', [ChatController::class, 'messages'])
-        ->whereNumber('conversation')->name('chats.messages');   
+        ->whereNumber('conversation')
+        ->name('chats.messages');   
     
 Route::post('/chats/{conversation}/mensajes', [ChatController::class, 'send'])
-        ->whereNumber('conversation')->name('chats.send');        
+        ->whereNumber('conversation')
+        ->name('chats.send');        
+
+
+// -- intercambios ---
+Route::get('/publicaciones/{listing}/intercambio', [TradeOfferController::class, 'create'])
+    ->whereNumber('listing')
+    ->name('trade-offers.create');    
+
+ Route::post('/publicaciones/{listing}/intercambio', [TradeOfferController::class, 'store'])
+    ->whereNumber('listing')
+    ->name('trade-offers.store');   
 
     // Solo administradores
     Route::middleware(EnsureUserIsAdmin::class)->prefix('admin')->group(function () {

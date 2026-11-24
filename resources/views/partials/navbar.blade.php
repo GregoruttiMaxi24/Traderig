@@ -47,6 +47,8 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Mi perfil</a></li>
                             <li><a class="dropdown-item" href="{{ route('users.show', auth()->user()) }}">Mi página pública</a></li>
+                             <li><a class="dropdown-item {{ request()->routeIs('chats.*') ? 'active' : '' }}" href="{{ route('chats.index') }}">Mis chats</a></li>
+                             
                             @if (auth()->user()->isAdmin())
                                 <li><a class="dropdown-item" href="{{ route('admin.index') }}">Administración</a></li>
                             @endif

@@ -19,7 +19,7 @@
                 <div class="card">
                     <div class="card-body p-4 text-center">
                         <p class="mb-2">Todavía no tenés conversaciones.</p>
-                        <p class="text-body-secondary mb-3">Entrá a una publicación y usá el botón "Consultar al vendedor" para empezar una.</p>
+                       <p class="text-body-secondary mb-3">Los chats se abren cuando enviás o recibís una propuesta de intercambio.</p>
                         <a href="{{ route('home') }}" class="btn btn-primary">Ver publicaciones</a>
                     </div>
                 </div>

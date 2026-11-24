@@ -50,9 +50,6 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
         ->whereNumber('auction')->name('auctions.bids.store');
 
  // ----Chat privado -------------
-Route::post('/publicaciones/{listing}/chat', [ChatController::class, 'start'])
-        ->whereNumber('listing')->name('chats.start');
-
 Route::get('/chats', [ChatController::class, 'index'])->name('chats.index');     
 
 Route::get('/chats/{conversation}', [ChatController::class, 'show'])

@@ -11,12 +11,16 @@ const props = defineProps({
         default: false },
 });
 
-//emitir el evento al contenedor con el texto que el usuario quiere enviar
-const emit = defineEmits(['submit']);
+//emitir el evento al contenedor con el texto que el usuario quiere enviar + validación en consola p el desarrollador (no se rompe nada). Laravel hace la validación real.
+const emit = defineEmits({
+    submit(text) {
+        return typeof text === 'string';
+    },
+});
 
 const text = ref('');
 
-//Cuando termina de enviar sin error, vaciar la caja para escribir el proximo mensaje
+//Cuando termina de enviar sin error, vaciar la caja de mensajes para escribir el proximo mensaje
 watch(() => props.sending, (isSending, wasSending) => {
 
     if (wasSending && !isSending && props.error === '') {
@@ -42,7 +46,7 @@ watch(() => props.sending, (isSending, wasSending) => {
                 aria-label="Mensaje"
             >
                <LoaderButton :loading="sending">Enviar</LoaderButton>
-               
+
             <div v-if="error" class="invalid-feedback">{{ error }}</div>
         </div>
         

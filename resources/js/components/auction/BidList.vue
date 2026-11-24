@@ -5,8 +5,9 @@ const props = defineProps({
     bids: { type: Array, required: true },
 });
 
-// con esto se muestran las 10 pujas más altas (la lista ya viene ordenada de mayor a menor).
-const latest = computed(() => props.bids.slice(0, 10));
+// con esto se muestran las 5 pujas más altas (la lista ya viene ordenada de mayor a menor).
+const latest = computed(() => props.bids.slice(0, 5));
+
 </script>
 
 
@@ -17,7 +18,7 @@ const latest = computed(() => props.bids.slice(0, 10));
         </p>
 
         <div v-for="bid in latest" :key="bid.id" class="tr-activity">
-            <span class="flex-grow-1">
+            <span>
                 {{ bid.user }}
                 <span class="tr-meta text-body-secondary d-block">{{ bid.created_at_human }}</span>
             </span>

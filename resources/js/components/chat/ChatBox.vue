@@ -1,5 +1,7 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import { ref } from 'vue';
+import { usePolling } from '../../composables/usePolling.js';
+
 import { getMessages, sendMessage } from '../../services/chat.js';
 import MessageList from './MessageList.vue';
 import MessageForm from './MessageForm.vue';
@@ -19,7 +21,7 @@ const loaded = ref(false);
 const error = ref(false);
 const sendError = ref('');
 const sending = ref(false);
-let timer = null;
+
 
 // Pide los mensajes a Laravel y los guarda para que la pantalla se actualice.
 async function loadMessages() {
@@ -49,12 +51,8 @@ async function send(text) {
     await loadMessages();
 }
 
-onMounted(() => {
-    loadMessages();
-    timer = setInterval(loadMessages, 5000);
-});
-
-onUnmounted(() => clearInterval(timer));
+//Pide los mensajes enseguida. Los repite cada 5 segundos.
+usePolling(loadMessages, 5000);
 
 </script>
 

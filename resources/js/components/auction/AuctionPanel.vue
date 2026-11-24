@@ -1,19 +1,37 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import { computed, ref } from 'vue';
+import { usePolling } from '../../composables/usePolling.js';
+
 import { getAuctionState, placeBid } from '../../services/auctions.js';
 import AuctionCountdown from './AuctionCountdown.vue';
 import BidForm from './BidForm.vue';
 import BidList from './BidList.vue';
 
 const props = defineProps({
-    stateUrl: { type: String, required: true },
-    bidUrl: { type: String, required: true },
-    loginUrl: { type: String, required: true },
-    sellerId: { type: Number, required: true },
-    startingPriceLabel: { type: String, required: true },
-    minIncrementLabel: { type: String, required: true },
-    initialBidCount: { type: Number, required: true },
-    initialIsOpen: { type: Boolean, required: true },
+    stateUrl: { 
+        type: String,
+         required: true },
+    bidUrl: { 
+        type: String, 
+        required: true },
+    loginUrl: { 
+        type: String, 
+        required: true },
+    sellerId: { 
+        type: Number, 
+        required: true },
+    startingPriceLabel: { 
+        type: String, 
+        required: true },
+    minIncrementLabel: { 
+        type: String, required: true 
+    },
+    initialBidCount: { 
+        type: Number, 
+        required: true },
+    initialIsOpen: { 
+        type: Boolean, 
+        required: true },
 });
 
 // Usuario con sesión (lo inyecta el layout) o null si es un visitante.
@@ -24,7 +42,12 @@ const error = ref(false);
 const bidError = ref('');
 const bidOk = ref('');
 const sending = ref(false);
-let timer = null;
+
+
+//Se usan los datos iniciales de la página mientras NO llega el primer estado de Laravel, 
+const isOpen = computed(() => (state.value ? state.value.is_open : props.initialIsOpen));
+const bidCount = computed(() => (state.value ? state.value.bid_count : props.initialBidCount));
+const panelTitle = computed(() => (isOpen.value ? 'Subasta activa' : 'Subasta finalizada'));
 
 //pide el estado a Laravel y lo guarda para que la pantalla se actualice
 async function loadState() {
@@ -55,21 +78,22 @@ async function sendBid(amount) {
     await loadState();
 }
 
-onMounted(() => {
-    loadState();
-    timer = setInterval(loadState, 5000);
-});
+//este pide el estado enseguida y lo repite cada 5 segundos
+   usePolling(loadState, 5000);
 
-onUnmounted(() => clearInterval(timer));
 </script>
 
 <template>
     <div class="tr-auction-panel">
         <section class="card tr-listing-detail__summary">
             <header class="tr-listing-detail__summary-heading">
-                <h2>{{ state ? (state.is_open ? 'Subasta activa' : 'Subasta finalizada') : (initialIsOpen ? 'Subasta activa' : 'Subasta finalizada') }}</h2>
-                <span>{{ state ? state.bid_count : initialBidCount }} ofertas</span>
+
+                 <h2>{{ panelTitle }}</h2>
+
+                <span>{{ bidCount }} ofertas</span>
+
             </header>
+
             <div class="card-body">
                 <p v-if="error && !state" class="tr-auction-panel__error" role="alert">
                     No se pudo cargar el estado de la subasta. Actualizá la página para volver a intentar.
@@ -79,35 +103,42 @@ onUnmounted(() => clearInterval(timer));
                     <span class="tr-label">{{ state.has_bids ? 'Puja actual' : 'Puja inicial' }}</span>
                     <p class="tr-price tr-listing-detail__price">{{ state.current_price_label }}</p>
 
-                    <div class="tr-listing-detail__auction-facts">
-                        <div>
-                            <span>Precio de salida</span>
-                            <strong>{{ startingPriceLabel }}</strong>
-                        </div>
-                        <div>
-                            <span>Incremento mínimo</span>
-                            <strong>{{ minIncrementLabel }}</strong>
-                        </div>
-                    </div>
+                      <div class="tr-listing-detail__auction-facts">
+                            <div>
+                                <span>Precio de salida</span>
+                                <strong>{{ startingPriceLabel }}</strong>
+                            </div>
 
-                                        <p class="tr-auction-panel__countdown">
+                            <div>
+                                <span>Incremento mínimo</span>
+                                <strong>{{ minIncrementLabel }}</strong>
+                            </div>
+                      </div>
+
+                    <p class="tr-auction-panel__countdown">
+
                         <template v-if="state.is_open">
                             Cierra en <AuctionCountdown :ends-at="state.ends_at" @finished="loadState" />
                         </template>
+
                         <template v-else>Subasta cerrada</template>
                     </p>
 
                     <!-- EL resultado FINAL: que solo se muestra cuando la subasta ya cerró -->
                     <template v-if="!state.is_open">
+
                         <p v-if="user && user.id === state.winner_id" class="tr-auction-panel__notice">
                             ¡Ganaste esta subasta por {{ state.current_price_label }}!
                         </p>
+
                         <p v-else-if="state.winner_name" class="tr-auction-panel__notice">
                             Ganó {{ state.winner_name }} con una puja de {{ state.current_price_label }}.
                         </p>
+
                         <p v-else class="tr-auction-panel__notice">
                             La subasta terminó sin pujas.
-                        </p>
+                         </p>
+                          
                     </template>
 
                     <div v-if="state.is_open" class="tr-auction-panel__form">
@@ -116,7 +147,9 @@ onUnmounted(() => clearInterval(timer));
                         <p v-if="user && user.id === sellerId" class="tr-auction-panel__notice">
                             Esta es tu subasta. No podés pujar en ella.
                         </p>
+
                         <a v-else-if="!user" :href="loginUrl" class="btn btn-primary btn-lg w-100">Ingresá para pujar</a>
+
                         <BidForm
                             v-else
                             :minimum="state.minimum_next_bid"
@@ -132,9 +165,12 @@ onUnmounted(() => clearInterval(timer));
 
         <section class="card tr-listing-detail__bid-history">
             <header class="tr-listing-detail__bid-history-heading">
+
                 <h2>Historial de pujas</h2>
-                <span>{{ state ? state.bid_count : initialBidCount }} ofertas</span>
+                 <span>{{ bidCount }} ofertas</span>
+
             </header>
+            
             <div class="card-body">
                 <p v-if="error && !state" class="tr-auction-panel__error" role="alert">
                     El historial no está disponible en este momento.

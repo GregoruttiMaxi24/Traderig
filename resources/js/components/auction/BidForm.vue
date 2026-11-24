@@ -10,7 +10,12 @@ const props = defineProps({
 });
 
 // Avisa (emite el evento ) al contenedor con el monto $ que el usuario quiere pujar hacia el componente padre
-const emit = defineEmits(['submit']);
+//+ verificacion en consola || La validación real de la puja o del mensaje se encarga Laravel
+const emit = defineEmits({
+    submit(amount) {
+        return typeof amount === 'number';
+    },
+});
 
 const amount = ref(props.minimum);
 

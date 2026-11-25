@@ -260,26 +260,16 @@
                         </div>
 
                         
-                         <div class="tr-listing-detail__seller-actions">
-                            @if ($listing->status === 'active')
-                                @guest
-                                    <a href="{{ route('login') }}" class="btn btn-primary">Ingresá para chatear</a>
-                                @endguest
+                        
 
-                                @auth
-                                    @if (auth()->id() !== $listing->user_id)
-                                        <form method="POST" action="{{ route('chats.start', $listing) }}">
-                                            @csrf
+                      <div class="tr-listing-detail__seller-actions">
+                        
+                                <a href="{{ route('users.show', $listing->user) }}" class="btn btn-outline-tr">Ver perfil</a>
+                                <button type="button" class="btn btn-outline-tr" data-copy-link>Copiar enlace</button>
+                       </div>
 
-                                            <button type="submit" class="btn btn-primary">Enviar un mensaje</button>
-                                        </form>
-                                    @endif
-                                @endauth
-                            @endif
-
-                            <a href="{{ route('users.show', $listing->user) }}" class="btn btn-outline-tr">Ver perfil</a>
-                            <button type="button" class="btn btn-outline-tr" data-copy-link>Copiar enlace</button>
-                        </div>
+                           
+                       
                     </div>
                 </section>
             </aside>

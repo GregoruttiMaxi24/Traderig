@@ -28,6 +28,8 @@
                     <a class="nav-link" href="{{ Route::has('auctions.index') ? route('auctions.index') : route('home').'#subastas' }}">Subastas</a>
                 </li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('home') }}#intercambios">Intercambios</a></li>
+        
+                {{-- LA DEJAMOS COMO PROMESA PARA LA TESIS?  --}}
                 @auth
                     @if (Route::has('dashboard'))
                         <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Mi panel</a></li>
@@ -47,6 +49,8 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Mi perfil</a></li>
                             <li><a class="dropdown-item" href="{{ route('users.show', auth()->user()) }}">Mi página pública</a></li>
+                             <li><a class="dropdown-item {{ request()->routeIs('chats.*') ? 'active' : '' }}" href="{{ route('chats.index') }}">Mis chats</a></li>
+
                             @if (auth()->user()->isAdmin())
                                 <li><a class="dropdown-item" href="{{ route('admin.index') }}">Administración</a></li>
                             @endif

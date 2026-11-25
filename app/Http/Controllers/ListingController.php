@@ -170,4 +170,104 @@ class ListingController extends Controller
 
         return view('listings.mine', compact('listings'));
     }
+
+
+    /**
+     * Muestra el formulario de edición de una publicación
+     * 
+     */
+ 
+    public function edit(Request $request, Listing $listing)
+    {
+        if ($listing->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        
+        $specifications = $listing->specifications; // Si la publicación no tiene especificaciones cargadas se muestra una fila vacía
+
+        if ($specifications === null || $specifications === []) {
+            $specifications = [['name' => '', 'value' => '']];
+        }
+
+        return view('listings.edit', [
+            'listing' => $listing,
+            'specifications' => $specifications,
+            'categories' => Category::query()->orderBy('name')->get(),
+            'conditions' => Listing::CONDITIONS,
+        ]);
+    }
+
+    /**
+     * Valida los datos recibidos, actualiza la publicación y vuelve a su ficha
+     * con un mensaje de confirmación.
+     */
+    public function update(Request $request, Listing $listing)
+    {
+        if ($listing->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $rules = [
+            'title' => ['required', 'min:3', 'max:150'],
+            'description' => ['required'],
+            'category_id' => ['required', 'exists:categories,id'],
+            'condition' => ['required'],
+            'brand' => ['nullable', 'max:80'],
+            'city' => ['nullable', 'max:100'],
+            'specifications' => ['required', 'array', 'max:10'],
+            'specifications.*.name' => ['required'],
+            'specifications.*.value' => ['required'],
+        ];
+
+        //El precio que solo se edite en las ventas
+        if ($listing->type === 'sale') {
+            $rules['price'] = ['required', 'numeric', 'min:1'];
+        }
+
+        $request->validate($rules, [
+            'title.required' => 'El nombre del componente es obligatorio.',
+            'title.min' => 'El nombre debe tener al menos 3 caracteres.',
+            'title.max' => 'El nombre puede tener hasta 150 caracteres.',
+            'description.required' => 'La descripción es obligatoria.',
+            'category_id.required' => 'Elegí una categoría.',
+            'category_id.exists' => 'La categoría elegida no es válida.',
+            'condition.required' => 'Elegí el estado del componente.',
+            'brand.max' => 'La marca puede tener hasta 80 caracteres.',
+            'city.max' => 'La ciudad puede tener hasta 100 caracteres.',
+            'specifications.required' => 'Agregá al menos una especificación del componente.',
+            'specifications.max' => 'Podés agregar hasta 10 especificaciones.',
+            'specifications.*.name.required' => 'Indicá el nombre de cada especificación.',
+            'specifications.*.value.required' => 'Indicá el valor de cada especificación.',
+            'price.required' => 'El precio es obligatorio.',
+            'price.numeric' => 'El precio debe ser un valor numérico.',
+            'price.min' => 'El precio debe ser mayor a 0.',
+        ]);
+
+        if (!array_key_exists($request->input('condition'), Listing::CONDITIONS)) {
+            return back()->withInput()->with('error', 'El estado elegido no es válido.');
+        }
+
+        $data = $request->only([
+            'category_id',
+            'title',
+            'description',
+            'brand',
+            'seller_notes',
+            'condition',
+            'city',
+            'specifications',
+        ]);
+
+        $data['accepts_trade'] = $request->has('accepts_trade');
+
+        if ($listing->type === 'sale') {
+            $data['price'] = (int) $request->input('price');
+        }
+
+        $listing->update($data);
+
+        return redirect()->route('listings.show', $listing)
+            ->with('success', 'Guardamos los cambios de tu publicación.');
+    }
 }

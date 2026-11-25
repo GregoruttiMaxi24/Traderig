@@ -35,10 +35,14 @@
                                 <td>{{ \App\Support\Money::format($listing->price) }}</td>
                                 <td>{{ $listing->created_at->format('d/m/Y') }}</td>
                                 <td>
-                                    <a href="{{ route('listings.show', $listing) }}" class="btn btn-outline-tr btn-sm">Ver</a>
+                                    <div class="d-flex flex-column gap-2">
+                                        <a href="{{ route('listings.show', $listing) }}" class="btn btn-outline-tr btn-sm">Ver</a>
+                                        <a href="{{ route('listings.edit', $listing) }}" class="btn btn-primary btn-sm">Editar</a>
+                                    </div>
                                 </td>
+                                
                             </tr>
-                            
+
                         @empty
                             <tr>
                                 <td colspan="7" class="text-center text-body-secondary">Todavía no publicaste ningún componente.</td>

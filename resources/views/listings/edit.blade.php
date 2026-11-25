@@ -6,7 +6,7 @@
     <div class="container py-4 py-lg-5">
         <div class="row justify-content-center">
             <div class="col-lg-9 col-xl-8">
-                <a href="{{ route('listings.show', $listing) }}" class="tr-listing-form__back">Volver a la publicación</a>
+                <a href="{{ route('listings.show', $listing) }}" class="tr-listing-form__back text-decoration-underline"> Volver a la publicación</a>
 
                 <header class="tr-listing-form__header">
 
@@ -14,10 +14,51 @@
                     <p>Cambiá los datos de tu componente.</p>
                 </header>
 
-                <form method="POST" action="{{ route('listings.update', $listing) }}" class="tr-listing-form">
+                <form method="POST" action="{{ route('listings.update', $listing) }}" enctype="multipart/form-data" class="tr-listing-form">
                     @csrf
 
                     <section class="tr-listing-form__section">
+
+                        <div class="mb-4">
+                            <h2>Fotos del componente</h2>
+                            <p>La publicación puede tener de 1 a 5 fotos. Elegí cuál es la principal y marcá las que querés sacar.</p>
+
+                            <div class="row g-3 mb-3">
+                                @foreach ($listing->photos as $photo)
+                                    <div class="col-6 col-md-4">
+                                        <img src="{{ asset('storage/'.$photo->path) }}" alt="{{ $listing->title }}" class="img-fluid rounded-2 shadow-sm mb-2 d-block">
+
+                                        <label class="d-block">
+                                            <input type="radio" name="main_photo" value="{{ $photo->id }}"
+                                                @checked($photo->id == old('main_photo', $mainPhotoId))
+                                            >
+                                            Foto principal
+                                        </label>
+
+                                        <label class="d-block">
+                                            <input type="checkbox" name="remove_photos[]" value="{{ $photo->id }}"
+                                                @checked(in_array($photo->id, old('remove_photos', [])))
+                                            >
+                                            Quitar
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <label for="photos" class="form-label">Agregar fotos <span class="text-body-secondary">(opcional)</span></label>
+
+                            <input type="file" id="photos" name="photos[]" multiple
+                                @class(['form-control', 'is-invalid' => $errors->has('photos.*')])
+                                aria-describedby="ayuda-photos"
+                            >
+
+                            <div class="text-muted small" id="ayuda-photos">Podés elegir varias imágenes. En total, la publicación puede tener hasta 5. Si hay un error, volvé a elegir las fotos nuevas.</div>
+
+                            @error('photos.*')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        
                         <h2 class="mb-4">Datos del producto</h2>
 
                         <div class="row">

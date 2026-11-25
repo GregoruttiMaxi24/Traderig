@@ -1,9 +1,3 @@
-/* ==========================================================================
-   TRADERIG - estilos propios sobre Bootstrap 5.3 (modo oscuro).
-   Identidad: presentación de marca del grupo. Componentes: paneles de vidrio,
-   botones tipo pastilla y tarjetas redondeadas (estilo de los mockups).
-   Colores y tipografías salen de las variables de abajo.
-   ========================================================================== */
 
 :root {
     /* Paleta oficial */
@@ -1801,6 +1795,54 @@ a.tr-home-category:hover {
     padding-top: 1.25rem;
     border-top: 1px solid rgba(115, 190, 182, 0.18);
 }
+
+
+/* ----------- CHAT Privado -------  */
+/* Chat privado */
+.tr-chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 26rem;
+    overflow-y: auto;
+    padding-bottom: 1rem;
+}
+
+.tr-message {
+    max-width: 75%;
+    padding: 0.6rem 0.9rem;
+    border-radius: 1rem;
+}
+
+.tr-message-own {
+    align-self: flex-end;
+    background: var(--tr-grad);
+}
+
+.tr-message-other {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--tr-glass-border);
+}
+
+.tr-message-text {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.tr-message-meta {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--tr-text-muted);
+}
+
+.tr-chat-form {
+    margin-top: 1rem;
+}
+
+
+
 
 @media (max-width: 575.98px) {
     .tr-gallery__thumbs,

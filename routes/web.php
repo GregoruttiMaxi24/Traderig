@@ -5,6 +5,7 @@ use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BidController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ProfileController;
@@ -46,6 +47,21 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
     // -- pujas en subastas ---
     Route::post('/subastas/{auction}/pujas', [BidController::class, 'store'])
         ->whereNumber('auction')->name('auctions.bids.store');
+
+ // ----Chat privado -------------
+Route::post('/publicaciones/{listing}/chat', [ChatController::class, 'start'])
+        ->whereNumber('listing')->name('chats.start');
+
+Route::get('/chats', [ChatController::class, 'index'])->name('chats.index');     
+
+Route::get('/chats/{conversation}', [ChatController::class, 'show'])
+        ->whereNumber('conversation')->name('chats.show');
+
+Route::get('/chats/{conversation}/mensajes', [ChatController::class, 'messages'])
+        ->whereNumber('conversation')->name('chats.messages');   
+    
+Route::post('/chats/{conversation}/mensajes', [ChatController::class, 'send'])
+        ->whereNumber('conversation')->name('chats.send');        
 
     // Solo administradores
     Route::middleware(EnsureUserIsAdmin::class)->prefix('admin')->group(function () {

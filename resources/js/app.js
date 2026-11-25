@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import AuctionPanel from './components/auction/AuctionPanel.vue';
+import ChatBox from './components/chat/ChatBox.vue';
 
 // el panel de de la subasta que solo se monta en la página que tiene el contenedor
 const auctionPanel = document.getElementById('auction-panel');
@@ -16,6 +17,17 @@ if (auctionPanel) {
         initialIsOpen: auctionPanel.dataset.initialIsOpen === 'true',
     }).mount(auctionPanel);
 }
+
+//----chat ----------------------------------------------
+const chatBox = document.getElementById('chat-box');
+
+if (chatBox) {
+    createApp(ChatBox, {
+        messagesUrl: chatBox.dataset.messagesUrl,
+        sendUrl: chatBox.dataset.sendUrl,
+    }).mount(chatBox);
+}
+// --- chat -----
 
 const photoInput = document.querySelector('[data-photo-input]');
 const photoPreview = document.querySelector('[data-photo-preview]');

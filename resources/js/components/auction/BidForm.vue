@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue';
+import LoaderButton from '../form/LoaderButton.vue';
 
 const props = defineProps({
     minimum: { type: Number, required: true },
@@ -9,7 +10,12 @@ const props = defineProps({
 });
 
 // Avisa (emite el evento ) al contenedor con el monto $ que el usuario quiere pujar hacia el componente padre
-const emit = defineEmits(['submit']);
+//+ verificacion en consola || La validación real de la puja o del mensaje se encarga Laravel
+const emit = defineEmits({
+    submit(amount) {
+        return typeof amount === 'number';
+    },
+});
 
 const amount = ref(props.minimum);
 
@@ -47,9 +53,8 @@ watch(() => props.minimum, (newMinimum) => {
 
         <p class="tr-bid-hint">Puja mínima: <span class="tr-price">{{ minimumLabel }}</span></p>
 
-        <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="sending">
-            {{ sending ? 'Enviando...' : 'Pujar' }}
-        </button>
+         <LoaderButton :loading="sending" class="btn-lg w-100">Pujar</LoaderButton>
+
     </form>
 
 </template>

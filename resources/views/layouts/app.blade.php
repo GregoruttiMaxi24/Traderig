@@ -32,11 +32,16 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
      <script src="{{ asset('js/traderig.js') }}"></script>
     <script>
-        // Datos de la sesión para los componentes Vue (null si nadie ingresó).
+        // Datos de la sesión para los componentes Vue.
+        window.TradeRig = window.TradeRig || {};
+
         @auth
-        window.TradeRig.user = { id: {{ auth()->id() }}, name: @json(auth()->user()->name) };
+            window.TradeRig.user = {
+                id: {{ auth()->id() }},
+                name: @json(auth()->user()->name)
+            };
         @else
-        window.TradeRig.user = null;
+            window.TradeRig.user = null;
         @endauth
     </script>
     @stack('scripts')

@@ -45,6 +45,26 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
     Route::get('/publicaciones/crear', [ListingController::class, 'create'])->name('listings.create');
     Route::post('/publicaciones', [ListingController::class, 'store'])->name('listings.store');
 
+    // (mis publicaciones) 
+    Route::get('/mis-publicaciones', [ListingController::class, 'myListings'])
+        ->name('listings.mine');
+
+    //EDITAR publicaciones
+    Route::get('/publicaciones/{listing}/editar', [ListingController::class, 'edit'])
+        ->whereNumber('listing')
+        ->name('listings.edit');
+    Route::post('/publicaciones/{listing}/editar', [ListingController::class, 'update'])
+        ->whereNumber('listing')
+        ->name('listings.update');
+
+// ELIMINAR
+    Route::get('/publicaciones/{listing}/eliminar', [ListingController::class, 'delete'])
+        ->whereNumber('listing')
+        ->name('listings.delete');
+    Route::post('/publicaciones/{listing}/eliminar', [ListingController::class, 'destroy'])
+        ->whereNumber('listing')
+        ->name('listings.destroy');
+
     // -- pujas en subastas ---
     Route::post('/subastas/{auction}/pujas', [BidController::class, 'store'])
         ->whereNumber('auction')->name('auctions.bids.store');

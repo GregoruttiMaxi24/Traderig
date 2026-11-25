@@ -1842,6 +1842,38 @@ a.tr-home-category:hover {
 }
 
 
+/*<<<<<<< Eliminar publicación <<<<*/
+.btn-danger-tr {
+    --bs-btn-color: #ffb3bd;
+    --bs-btn-border-color: #ff7a8a;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: rgba(255, 90, 110, 0.28);
+    --bs-btn-hover-border-color: #ff9aa6;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: rgba(255, 90, 110, 0.4);
+    --bs-btn-active-border-color: #ff9aa6;
+    border-width: 1.5px;
+}
+
+
+.tr-delete-warning {
+    padding: 1rem 1.25rem;
+    border: 1px solid rgba(255, 122, 138, 0.45);
+    border-radius: 1rem;
+    background: rgba(228, 39, 61, 0.249);
+    color: var(--tr-text);
+}
+
+.tr-delete-warning ul {
+    margin: 0.5rem 0 0;
+}
+
+.tr-delete-photo {
+    width: 100%;
+    max-height: 12rem;
+    object-fit: cover;
+}
+
 
 
 @media (max-width: 575.98px) {

@@ -38,6 +38,7 @@
                                     <div class="d-flex flex-column gap-2">
                                         <a href="{{ route('listings.show', $listing) }}" class="btn btn-outline-tr btn-sm">Ver</a>
                                         <a href="{{ route('listings.edit', $listing) }}" class="btn btn-primary btn-sm">Editar</a>
+                                        <a href="{{ route('listings.delete', $listing) }}" class="btn btn-danger btn-sm">Eliminar</a>
                                     </div>
                                 </td>
                                 

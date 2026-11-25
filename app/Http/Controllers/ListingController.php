@@ -13,6 +13,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use RuntimeException;
 use Throwable;
+use App\Models\Conversation;
 
 class ListingController extends Controller
 {
@@ -272,7 +273,7 @@ class ListingController extends Controller
             }
         }
 
-        
+
          $newPhotos = [];
 
 
@@ -363,4 +364,76 @@ class ListingController extends Controller
         return redirect()->route('listings.show', $listing)
             ->with('success', 'Guardamos los cambios de tu publicación.');
     }
+
+
+
+/**
+* Mostrar la página de confirmación para eliminar una publicación propia.
+*/
+    public function delete(Request $request, Listing $listing)
+    {
+        if ($listing->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        
+        $bidsCount = 0; //Los datos que se pierden al eliminar se muestran en la confirmación
+
+        if ($listing->auction !== null) {
+            $bidsCount = $listing->auction->bids()->count();
+        }
+
+        return view('listings.delete', [
+            'listing' => $listing,
+            'bidsCount' => $bidsCount,
+            'offersCount' => $listing->tradeOffers()->count(),
+            'chatsCount' => Conversation::where('listing_id', $listing->id)->count(),
+        ]);
+    }
+
+        /**
+         * El usuario elimina su publicación.
+         *
+         * En una transacción borra los mensajes y las conversaciones de la publicación
+         * y después la publicación; si todo salió bien, borra sus fotos del disco.
+         * 
+         */
+        public function destroy(Request $request, Listing $listing)
+        {
+            if ($listing->user_id !== $request->user()->id) {
+                abort(403);
+            }
+
+           
+            $paths = [];  // Ruta de las fotos guardadas antes de borrar los registros
+
+            foreach ($listing->photos as $photo) {
+                $paths[] = $photo->path;
+            }
+
+            try {
+                DB::transaction(function () use ($listing) {
+                    $conversations = Conversation::where('listing_id', $listing->id)->get();
+
+                    foreach ($conversations as $conversation) {
+                        $conversation->messages()->delete();
+                        $conversation->delete();
+                    }
+
+                    $listing->delete();
+                });
+
+                foreach ($paths as $path) {
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                }
+
+                return redirect()->route('listings.mine')
+                    ->with('success', 'La publicación ' . $listing->title . ' se eliminó con éxito.');
+            } catch (Throwable $th) {
+                return redirect()->route('listings.mine')
+                    ->with('error', 'Error. La publicación no se pudo eliminar.');
+            }
+        }
 }

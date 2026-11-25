@@ -45,6 +45,10 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
     Route::get('/publicaciones/crear', [ListingController::class, 'create'])->name('listings.create');
     Route::post('/publicaciones', [ListingController::class, 'store'])->name('listings.store');
 
+    //El nombre 'index' queda para el catalogo que muestra todos los productos. -("mine" = mio) 
+    Route::get('/mis-publicaciones', [ListingController::class, 'myListings'])
+        ->name('listings.mine');
+
     // -- pujas en subastas ---
     Route::post('/subastas/{auction}/pujas', [BidController::class, 'store'])
         ->whereNumber('auction')->name('auctions.bids.store');

@@ -157,4 +157,17 @@ class ListingController extends Controller
 
         return view('listings.show', compact('listing', 'sellerListingsCount', 'galleryPhotos'));
     }
+
+
+    /**
+     * Muestra la tabla con las publicaciones del usuario con sesión iniciada,
+     * la publicación más nueva queda arriba.
+     * 
+     */
+    public function myListings(Request $request)
+    {
+        $listings = $request->user()->listings()->with('category')->latest()->get();
+
+        return view('listings.mine', compact('listings'));
+    }
 }

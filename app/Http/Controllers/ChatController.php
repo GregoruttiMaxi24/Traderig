@@ -14,34 +14,10 @@ use Illuminate\View\View;
 class ChatController extends Controller
 {
     
-
-/**
- * Abre una conversación existente con el vendedor de la publicación o crea una nueva
- * 
- */
-    public function start(Request $request, Listing $listing): RedirectResponse
-
-    {
-        abort_unless($listing->status === 'active', 404);
-
-        $user = $request->user();
-
-        if ($listing->user_id === $user->id) {
-            return back()->with('error', 'Esta es tu publicación: no podés chatear con vos mismo.');
-        }
-
-        $conversation = Conversation::firstOrCreate(
-            ['listing_id' => $listing->id, 'buyer_id' => $user->id],
-            ['seller_id' => $listing->user_id],
-        );
-
-        return redirect()->route('chats.show', $conversation);
-    }
-
-
     /**
      * Lista las conversaciones del usuario, ya sea como comprador o como vendedor.
-     * las conversaciones que  tuvieron actividad más reciente aparecen primero.
+     * las conversaciones que tuvieron actividad más reciente aparecen primero.
+     * 
      */
     public function index(Request $request): View
     {

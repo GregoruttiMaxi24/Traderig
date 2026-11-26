@@ -1,98 +1,122 @@
-# Traderig
+# TRADERIG
 
-Traderig es un marketplace para comprar, vender, intercambiar y subastar componentes de PC. El proyecto está desarrollado con Laravel y conserva las tecnologías y convenciones que ya utiliza la aplicación.
+Plataforma web para **comprar, vender, intercambiar y subastar componentes de PC usados**: placas de video, procesadores, memorias RAM, motherboards, almacenamiento, fuentes, gabinetes, monitores y periféricos.
 
-## Funcionalidades principales
+## De qué se trata
 
-- Inicio con categorías y publicaciones destacadas.
-- Publicaciones de componentes para venta o subasta.
-- Intercambios y perfiles de vendedores.
-- Carga de fotos para acompañar una publicación.
-- Galería de fotos en el detalle del componente.
+Hoy, quien quiere vender un componente usado lo publica en sitios generales donde es difícil describirlo técnicamente, y quien busca uno no puede comparar ni intercambiar. TRADERIG reúne en un solo lugar tres formas de operar:
 
-## Publicar un componente con fotos
+- **Venta directa:** el vendedor publica un componente con precio fijo.
+- **Subasta:** el vendedor define un precio inicial, un aumento mínimo y una fecha de cierre; los compradores pujan y gana la oferta más alta cuando vence el plazo.
+- **Intercambio:** el comprador propone cambiar uno de sus componentes (con una diferencia de dinero opcional, que puede pagar cualquiera de las partes).
 
-La creación de publicaciones está disponible para usuarios autenticados con una cuenta activa. El formulario solicita los datos del componente y permite adjuntar entre 1 y 5 imágenes en formato JPG, PNG o WebP, con un máximo de 5 MB por imagen.
+Cada publicación incluye fotos, descripción, estado de conservación y especificaciones técnicas en pares de nombre y valor, que sirven para cualquier categoría (por ejemplo, socket y núcleos en un procesador, o memoria e interfaz en una placa de video).
 
-La primera imagen seleccionada se utiliza como foto principal. En la página de detalle se muestra la galería y, cuando hay más de una foto, se puede elegir cuál ver usando las miniaturas. Si una publicación no tiene imágenes, se muestra un estado alternativo.
+El chat privado entre dos usuarios **no está disponible libremente**: se abre cuando una de las partes se compromete (por ejemplo, al enviar una propuesta de intercambio). Así se evita que las operaciones se cierren fuera de la plataforma.
 
-Las imágenes se guardan en el disco público de Laravel, dentro de `storage/app/public/listings`. Para que puedan mostrarse desde el navegador, hay que crear el enlace público:
+Es un trabajo grupal, desarrollado en Laravel.
 
-```bash
-php artisan storage:link
-```
+## Funcionalidades implementadas
 
-Las publicaciones también admiten observaciones opcionales del vendedor y entre 1 y 10 especificaciones técnicas en pares de nombre y valor. Ese formato flexible sirve para distintas categorías: por ejemplo, memoria e interfaz en una tarjeta gráfica, o socket y núcleos en un procesador. Las especificaciones se guardan como JSON en `listings.specifications`; las observaciones se guardan en `listings.seller_notes`. La migración correspondiente se aplica con `php artisan migrate`.
+**Cuentas y perfiles**
 
-Al guardar una publicación, el servidor valida los datos y las imágenes. La creación del componente, sus fotos y, si corresponde, los datos iniciales de la subasta se realizan juntos. Si ocurre un error durante el proceso, se revierten los cambios y se intenta limpiar las imágenes que ya se habían guardado.
+- Registro, inicio y cierre de sesión.
+- Perfil editable (datos personales y cambio de contraseña).
+- Página pública de cada vendedor, con sus publicaciones activas.
+- Roles de usuario y de administrador. Las cuentas inactivas no pueden operar.
 
-## Cómo está implementada la publicación con fotos
+**Catálogo**
 
-El recorrido está separado entre rutas, controlador, vista y JavaScript. Cada parte cumple una función distinta:
+- Portada con categorías y publicaciones.
+- Detalle de la publicación con galería de fotos y miniaturas, descripción, observaciones del vendedor, especificaciones técnicas y datos del vendedor.
+- Precios en pesos enteros, sin centavos.
 
-- **Rutas (`routes/web.php`)**: `listings.create` abre el formulario y `listings.store` recibe sus datos. Ambas están dentro del middleware `auth` y `EnsureUserIsActive`, por lo que un visitante o una cuenta inactiva no puede publicar.
-- **`ListingController::create()`**: consulta las categorías ordenadas por nombre y envía a la vista las opciones de categoría, estado y tipo. Así, el formulario usa los valores disponibles en los modelos en lugar de duplicar esas listas en la plantilla.
-- **`ListingController::store()`**: valida el envío, crea la publicación, guarda sus fotos y crea la subasta cuando corresponde. Si todo termina bien, redirige al detalle.
-- **`ListingController::show()`**: comprueba si el visitante puede ver la publicación, prepara sus relaciones y entrega a la plantilla las fotos ordenadas para la galería.
-- **Especificaciones**: el formulario permite agregar y quitar filas de nombre/valor en el navegador; el controlador valida y limpia esas filas antes de persistirlas. La ficha muestra las especificaciones solo cuando existen y separa las observaciones del vendedor de la descripción principal.
-- **Estado de subasta (`AuctionController::state()`)**: responde con los datos actuales de la subasta y el historial de pujas, incluida la cantidad de ofertas. La interfaz Vue usa esa respuesta para mantener actualizados los importes y el estado del panel.
-- **Vista `listings/create.blade.php`**: muestra los campos y el selector de archivos. `enctype="multipart/form-data"` es necesario para que el navegador envíe archivos junto con los campos normales.
-- **Vista `listings/show.blade.php`**: genera la imagen principal, las miniaturas, las observaciones y la tabla de especificaciones. La condición `hidden` deja visible solo la foto seleccionada, y los atributos `aria-label` y `aria-pressed` comunican el estado de los botones a tecnologías de asistencia.
-- **`resources/js/app.js`**: crea vistas previas en el formulario, permite cambiar la foto visible y abrirla ampliada, y administra las filas dinámicas de especificaciones. La lógica solo se conecta cuando encuentra los elementos correspondientes, así que no interfiere con otras pantallas.
+**Publicar un componente (ABM completo)**
 
-### Decisiones menos obvias del controlador
+- Alta con 1 a 5 fotos, especificaciones dinámicas, tipo (venta o subasta) y opción de aceptar intercambios.
+- Mis publicaciones: tabla con todo lo que publicó el usuario.
+- Edición de datos y de fotos (agregar, quitar y elegir la principal).
+- Baja con pantalla de confirmación que avisa qué se pierde (fotos, pujas, propuestas y chats).
 
-**Validación de fotos y campos de subasta**
+**Subastas**
 
-- `photos` valida que se haya enviado una lista de entre 1 y 5 archivos. `photos.*` aplica las reglas a cada archivo: que sea una imagen, que su contenido y extensión correspondan a JPG, PNG o WebP, y que no supere 5120 KB (5 MB).
-- `exclude_unless:type,auction` hace que la fecha de cierre y el incremento mínimo solo sean obligatorios cuando el tipo es una subasta. Para una venta directa, esos campos se excluyen de la validación.
-- `Rule::in(...)` restringe los valores aceptados a las opciones definidas por el modelo; evita guardar valores arbitrarios enviados desde el navegador.
+- Pujas con validación del aumento mínimo y bloqueo de la fila para evitar pujas simultáneas.
+- Historial con las últimas 5 pujas, cuenta regresiva y panel que se actualiza solo cada 5 segundos.
+- Cierre automático al vencer el plazo: se determina el ganador (la puja más alta) y se muestra en la publicación.
 
-**Elegir qué datos se guardan**
+**Intercambios y chat**
 
-`Arr::only($data, [...])` crea una lista explícita de los campos que pertenecen a la publicación. Esto evita guardar por accidente otros valores validados que tienen otro destino, como las fotos o el incremento de la subasta. El usuario se obtiene de la sesión con `$request->user()`; no se confía en un `user_id` enviado por el formulario. `boolean('accepts_trade')` normaliza el valor del checkbox, que puede no aparecer en el envío cuando está desmarcado.
+- Proponer un intercambio: se ofrece una publicación propia, una diferencia de dinero (indicando quién la paga), un mensaje, o una combinación. Una sola propuesta pendiente por persona y publicación.
+- Al enviar la propuesta se abre el chat privado entre las dos partes.
+- Chat con actualización automática cada 5 segundos y acceso solo para los participantes.
+- Enlace "Mis chats" en el menú del usuario.
 
-**Transacción y archivos**
+**Administración**
 
-`DB::transaction(...)` agrupa las escrituras de base de datos. Si falla la creación de la publicación, de una foto o de la subasta, Laravel revierte esos cambios para no dejar registros incompletos.
+- Panel con totales y últimos usuarios registrados.
 
-Los archivos del disco no forman parte de una transacción de base de datos. Por eso, cada ruta guardada se agrega a `$storedPhotoPaths`. Si ocurre un error después de guardar alguna imagen, el `catch` intenta borrarlas y luego vuelve a lanzar el error original. De esa manera el fallo no se oculta y tampoco quedan archivos huérfanos si la limpieza funciona.
+**En desarrollo (próximas etapas)**
 
-Dentro de la transacción, `$request->user()->listings()->create(...)` crea la publicación a través de la relación del usuario. Si el tipo es subasta, también crea el registro relacionado con el precio inicial, el precio actual, el incremento y el cierre. `putFile('listings', $photo)` guarda cada archivo en el disco público con un nombre generado por Laravel; la base de datos conserva la ruta, no el contenido del archivo. La primera foto recibe `is_main = true` y cada una recibe un `sort_order`.
-
-**Preparar el detalle**
-
-En `show()`, `abort_unless($canSee, 404)` impide mostrar publicaciones inactivas a personas que no sean su dueño o un administrador. La respuesta 404 también evita revelar que una publicación privada existe.
-
-`load([...])` carga de antemano las relaciones que necesita la vista (categoría, vendedor, fotos y subasta). Esto evita consultas repetidas al renderizar los datos relacionados. Las pujas se consultan solo si existe subasta; si no, se usa una colección vacía para que la vista reciba un tipo de dato consistente. Finalmente, `sortByDesc('is_main')` pone la foto principal primero y `values()` reordena los índices de la colección para que coincidan con los índices de las miniaturas.
-
-### Vista previa y selección de fotos en JavaScript
-
-`URL.createObjectURL(file)` crea una URL temporal local para mostrar una foto antes de subirla; no la envía ni la guarda en el servidor. Cuando el usuario cambia su selección, `URL.revokeObjectURL(url)` libera las URLs anteriores y `replaceChildren()` limpia las vistas previas viejas. Esto evita acumular recursos temporales mientras se cambia la selección.
-
-En la galería, un único manejador de clics por contenedor detecta qué miniatura se presionó. El índice de `data-photo-index` determina qué imagen mostrar; luego se actualizan `hidden`, la clase visual activa y `aria-pressed`. Así, la imagen visible, el estilo de la miniatura y el estado accesible se mantienen sincronizados.
+- Aceptar o rechazar propuestas de intercambio desde la plataforma.
+- Botón "Comprar" con estado reservado y chat con el vendedor.
+- Chat entre el ganador de una subasta y el vendedor.
+- Listados de Subastas y de Productos con filtros.
+- Moderación completa desde el panel de administración.
 
 ## Tecnologías
 
-- PHP y Laravel.
-- Blade y Bootstrap para las vistas.
-- Vue para el panel interactivo de subastas.
-- JavaScript y CSS existentes en el proyecto.
-- Vite para compilar los recursos del frontend.
+| Área | Tecnología |
+|---|---|
+| Lenguaje y framework | PHP 8.3 o superior y Laravel 13 |
+| Base de datos | MariaDB (migraciones, seeders y Eloquent) |
+| Vistas | Blade y Bootstrap 5.3 (cargado desde CDN) |
+| Estilos | CSS propio en `public/css/traderig.css` |
+| JavaScript | JavaScript puro (galería de fotos y editor de especificaciones) y Vue 3 con Composition API (panel de subastas y chat) |
+| Compilación del frontend | Vite 8 con `@vitejs/plugin-vue` y `laravel-vite-plugin` |
+| Tipografías | Roboto, Roboto Mono y Open Sans (Google Fonts) |
+| Pruebas | PHPUnit 12 |
+| Control de versiones | Git y GitHub (ramas por tarea y Pull Requests) |
 
-No se agregó una dependencia de frontend para implementar la carga de fotos o la galería.
+Bootstrap y las tipografías se cargan desde internet, por lo que hace falta conexión para ver el sitio con su estilo completo.
 
-## Preparar el proyecto localmente
+## Requisitos
 
-Requisitos: PHP 8.3 o superior, Composer, Node.js LTS (20.19 o superior) con npm y MariaDB con una base de datos vacía llamada `traderig`.
+Instalar antes de empezar:
 
-1. Instalar las dependencias de PHP:
+- PHP 8.3 o superior y [Composer](https://getcomposer.org/)
+- [Node.js](https://nodejs.org/) LTS (20.19 o superior), que incluye npm
+- MariaDB
+- Git
+
+Para comprobar que están instalados:
+
+```bash
+php -v
+composer -V
+node -v
+npm -v
+mariadb --version
+git --version
+```
+
+## Cómo instalar y correr el proyecto
+
+1. Clonar el repositorio y entrar a la carpeta:
+
+   ```bash
+   git clone https://github.com/GregoruttiMaxi24/Traderig.git
+   cd Traderig
+   ```
+
+   Si recibiste el proyecto en un .zip, descomprimilo, entrá a la carpeta y empezá por el paso 2.
+
+2. Instalar las dependencias de PHP:
 
    ```bash
    composer install
    ```
 
-2. Crear el archivo de entorno y generar la clave de la aplicación:
+3. Crear el archivo de entorno y generar la clave de la aplicación:
 
    ```bash
    cp .env.example .env
@@ -105,54 +129,46 @@ Requisitos: PHP 8.3 o superior, Composer, Node.js LTS (20.19 o superior) con npm
    Copy-Item .env.example .env
    ```
 
-3. Configurar la conexión a la base de datos en `.env` (`DB_USERNAME`, `DB_PASSWORD` y `DB_PORT` si tu MariaDB no usa el 3306) y ejecutar las migraciones con los datos de prueba:
+4. Crear una base de datos vacía llamada `traderig` (desde HeidiSQL, phpMyAdmin o la consola de MariaDB):
+
+   ```sql
+   CREATE DATABASE traderig CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+
+5. Abrir `.env` y completar los datos de la conexión: `DB_USERNAME`, `DB_PASSWORD` y, si tu MariaDB no usa el puerto 3306, `DB_PORT`.
+
+6. Crear las tablas y cargar los datos de ejemplo (categorías, usuarios de prueba y, con `APP_ENV=local`, publicaciones y subastas):
 
    ```bash
    php artisan migrate --seed
    ```
 
-4. Instalar las dependencias de JavaScript y compilar los recursos:
+7. Instalar las dependencias de JavaScript y compilar los recursos:
 
    ```bash
    npm install
    npm run build
    ```
 
-5. Habilitar el acceso público a las imágenes:
+8. Habilitar el acceso público a las imágenes:
 
    ```bash
    php artisan storage:link
    ```
 
-6. Levantar el proyecto con **dos terminales abiertas a la vez**:
+9. Levantar el servidor:
 
    ```bash
    php artisan serve
    ```
 
+   Si vas a modificar JavaScript o Vue, abrí una segunda terminal y dejá corriendo también:
+
    ```bash
    npm run dev
    ```
 
-   La primera sirve el sitio y la segunda compila el JavaScript (Vite). Si solo querés probar el sitio sin modificar JavaScript, alcanza con correr una vez `npm run build`.
-
-7. Abrir http://127.0.0.1:8000
-
-## Pruebas
-
-Para ejecutar las pruebas de publicación y de la página de inicio:
-
-```bash
-php artisan test --compact tests/Feature/ListingControllerTest.php tests/Feature/AuctionControllerTest.php tests/Feature/SiteTest.php
-```
-
-Para ejecutar toda la suite:
-
-```bash
-php artisan test
-```
-
-Las pruebas de publicaciones cubren el acceso autenticado, la validación y almacenamiento de fotos, el límite de cantidad y tamaño, la validación y persistencia de especificaciones y observaciones, la creación de subastas y la galería del detalle. `AuctionControllerTest` verifica que el estado de la subasta incluya la cantidad de pujas y que no se publique si el componente está inactivo.
+10. Abrir http://127.0.0.1:8000
 
 ## Usuarios de prueba
 
@@ -161,8 +177,34 @@ Las pruebas de publicaciones cubren el acceso autenticado, la validación y alma
 | Administrador | admin@traderig.test | password |
 | Usuario | usuario@traderig.test | password |
 
-Los datos de ejemplo (publicaciones y subastas) se cargan solo con `APP_ENV=local`.
-Para volver a empezar con la base limpia: `php artisan migrate:fresh --seed`.
+Los datos de ejemplo se cargan solo con `APP_ENV=local`. Para volver a empezar con la base limpia (**borra todas las tablas**):
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+## Pruebas
+
+```bash
+php artisan test
+```
+
+Cubren la publicación de componentes (acceso, validación y almacenamiento de fotos, especificaciones, subastas), el estado de las subastas y la portada.
+
+## Estructura del proyecto
+
+| Carpeta | Contenido |
+|---|---|
+| `routes/web.php` | Rutas del sitio |
+| `app/Http/Controllers` | Controladores (publicaciones, subastas, pujas, intercambios, chat, perfil, administración) |
+| `app/Models` | Modelos Eloquent (usuarios, publicaciones, fotos, subastas, pujas, intercambios, conversaciones y mensajes) |
+| `resources/views` | Vistas Blade |
+| `resources/js` | Componentes Vue (subasta y chat), servicios y `app.js` |
+| `database/migrations` y `database/seeders` | Esquema y datos de ejemplo |
+| `public/css/traderig.css` | Estilos propios |
+| `docs/` | Documentación técnica |
+
+La explicación detallada de cómo se implementó la publicación con fotos está en [`docs/publicacion-con-fotos.md`](docs/publicacion-con-fotos.md).
 
 ## Cómo trabajamos
 
@@ -170,6 +212,6 @@ Para volver a empezar con la base limpia: `php artisan migrate:fresh --seed`.
 - Antes de empezar: `git checkout main` y `git pull`.
 - Cada tarea en su propia rama: `git checkout -b feature/nombre-de-la-tarea`.
 - Commits chicos y con mensaje claro.
-- Al terminar: `git push` y abrir un Pull Request. Otra persona lo revisa antes de unirlo a `main`.
+- Al terminar: `git push` y abrir un Pull Request. Otra persona lo revisa antes de unirlo a `main` (con "Create a merge commit").
 - Nunca se modifica una migración ya subida: se crea una nueva.
 - El archivo `.env` no se sube nunca (cada uno tiene el suyo).
